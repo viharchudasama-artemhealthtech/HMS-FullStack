@@ -1,6 +1,6 @@
 # 🏥 HMS Core - Unified Healthcare Operations Platform
 
-A high-performance, production-ready Hospital Management System (HMS) architected for mission-critical medical environments. Built on **Spring Boot 3 (Java 17)** and **Angular 17**, it features real-time triage, industrial-grade concurrency protection, and automated financial workflows.
+A high-performance, production-ready Hospital Management System (HMS) architected for mission-critical medical environments. Built on **Spring Boot 3 (Java 17)** and **Angular 17**, it features real-time triage, industrial-grade concurrency protection, and automated MySQL-backed financial workflows.
 
 ---
 
@@ -34,7 +34,7 @@ graph TB
     end
 
     subgraph Data_Tier [Persistence Layer]
-        DB[(PostgreSQL 15)]
+        DB[(MySQL 8.0)]
         REDIS[[Proposed: Redis Cache]]
     end
 
@@ -108,7 +108,7 @@ sequenceDiagram
 | **Frontend** | Angular 17+ | Standalone components, RxJS, PrimeNG Premium UI |
 | **Backend** | Spring Boot 3.3 | RESTful Micro-controllers, Lombok, MapStruct |
 | **Security** | Spring Security 6 | Stateless JWT, RBAC, Password Hashing |
-| **Data** | PostgreSQL + JPA | Pessimistic Locking, Auditable Entities |
+| **Data** | MySQL 8.0 + Hibernate | Pessimistic Locking, Auditable Entities |
 | **Real-time** | WebSocket (STOMP) | Live Dashboard stats and triage updates |
 
 ---
@@ -117,7 +117,7 @@ sequenceDiagram
 
 ### Backend (Core API)
 1. Ensure **JDK 17** and **Maven** are installed.
-2. Update `backend/src/main/resources/application.properties` with PostgreSQL credentials.
+2. Update `backend/src/main/resources/application-mysql.properties` with your database credentials.
 3. Run: `mvn clean spring-boot:run`
 
 ### Frontend (User Interface)
