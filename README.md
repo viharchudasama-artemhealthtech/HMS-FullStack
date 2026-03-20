@@ -4,7 +4,7 @@ A production-grade, real-time Hospital Management System (HMS) built with **Spri
 
 ---
 
-## 🏗️ System Architecture
+## 🏗️ "System Architecture"
 
 ```mermaid
 graph TD
