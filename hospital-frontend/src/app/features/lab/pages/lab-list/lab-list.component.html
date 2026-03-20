@@ -1,0 +1,305 @@
+<div class="dashboard-layout">
+  <app-sidebar></app-sidebar>
+
+  <main class="main-content">
+    <app-header></app-header>
+
+    <div class="page-body">
+      <div class="content-header">
+        <div class="title-section">
+          <h1>Laboratory Tests</h1>
+          <p>Request and track patient lab investigations</p>
+        </div>
+        <div
+          class="header-actions"
+        >
+          <button
+          class="btn-primary"
+          (click)="openCreateForm()"
+          *ngIf="userRole === 'DOCTOR' || userRole === 'ADMIN' || userRole === 'LABORATORY_STAFF'"
+        >    <i class="ri-add-line"></i> Request Test
+          </button>
+        </div>
+      </div>
+
+      <!-- Lab Staff Workflow Guide -->
+      <div
+        class="info-card"
+        *ngIf="userRole === 'LABORATORY_STAFF'"
+      >
+        <div class="info-header">
+          <i class="ri-information-line"></i>
+          <h3>Lab Test Workflow</h3>
+        </div>
+        <div class="info-content">
+          <div class="workflow-steps">
+            <div class="step">
+              <div class="step-number">1</div>
+              <div class="step-content">
+                <strong>Pending Tests</strong>
+                <p>Doctor requests a lab test - status shows as PENDING</p>
+              </div>
+            </div>
+            <div class="step-arrow">
+              <i class="ri-arrow-right-line"></i>
+            </div>
+            <div class="step">
+              <div class="step-number">2</div>
+              <div class="step-content">
+                <strong>Start Test</strong>
+                <p>Click <i class="ri-play-line"></i> to mark as IN PROGRESS when you start testing</p>
+              </div>
+            </div>
+            <div class="step-arrow">
+              <i class="ri-arrow-right-line"></i>
+            </div>
+            <div class="step">
+              <div class="step-number">3</div>
+              <div class="step-content">
+                <strong>Complete Test</strong>
+                <p>Click <i class="ri-checkbox-circle-line"></i> to mark as COMPLETED when results are ready</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-card form-card-elevated" *ngIf="showCreateForm || showEditForm">
+        <div class="form-card-header">
+          <h3><i class="ri-test-tube-line"></i> {{ showEditForm ? 'Modify Lab Test' : 'Request Lab Test' }}</h3>
+          <button class="icon-btn" (click)="closeForm()">
+            <i class="ri-close-line"></i>
+          </button>
+        </div>
+        <form [formGroup]="labForm" (ngSubmit)="onSubmit()">
+          <div class="form-shell">
+            <div class="form-section section-wide">
+              <div class="section-title">
+                <div class="section-icon">
+                  <i class="ri-test-tube-line"></i>
+                </div>
+                <div class="section-copy">
+                  <h3>Investigation Request</h3>
+                  <p>
+                    Describe the requested test, category, and patient
+                    assignment.
+                  </p>
+                </div>
+              </div>
+              <div class="form-grid two-column">
+                <div class="form-group">
+                  <label class="form-label">Test Name *</label>
+                  <input
+                    pInputText
+                    type="text"
+                    formControlName="testName"
+                    class="form-control"
+                    placeholder="e.g. Complete Blood Count, Lipid Profile"
+                  />
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Test Code *</label>
+                  <input
+                    pInputText
+                    type="text"
+                    formControlName="testCode"
+                    class="form-control"
+                    placeholder="e.g. CBC-001"
+                  />
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Test Price (₹) *</label>
+                  <input
+                    pInputText
+                    type="number"
+                    formControlName="price"
+                    class="form-control"
+                    placeholder="e.g. 500"
+                    min="0.01"
+                    step="0.01"
+                  />
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Patient *</label>
+                  <p-dropdown
+                    formControlName="patientId"
+                    [options]="patientOptions()"
+                    optionLabel="label"
+                    optionValue="value"
+                    placeholder="Select patient..."
+                    styleClass="w-full"
+                  ></p-dropdown>
+                </div>
+                <div class="form-group" *ngIf="labForm.get('patientId')?.value">
+                  <label class="form-label">Linked Appointment (Optional)</label>
+                  <p-dropdown
+                    formControlName="appointmentId"
+                    [options]="appointmentOptions()"
+                    optionLabel="label"
+                    optionValue="value"
+                    placeholder="Link to an appointment..."
+                    styleClass="w-full"
+                    [showClear]="true"
+                  ></p-dropdown>
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Category</label>
+                  <input
+                    pInputText
+                    type="text"
+                    formControlName="category"
+                    class="form-control"
+                    placeholder="e.g. Hematology"
+                  />
+                </div>
+                <div class="form-group full-width">
+                  <label class="form-label">Description / Instructions</label>
+                  <textarea
+                    pInputTextarea
+                    formControlName="description"
+                    class="form-control"
+                    rows="2"
+                    placeholder="Optional instructions for lab staff..."
+                  ></textarea>
+                </div>
+              </div>
+            </div>
+            <div class="form-actions">
+              <button type="button" class="btn-outline" (click)="closeForm()">
+                Cancel
+              </button>
+              <button
+                type="submit"
+                class="btn-primary"
+                [disabled]="isSubmitting"
+              >
+                {{ isSubmitting ? (showEditForm ? "Updating..." : "Requesting...") : (showEditForm ? "Update Test" : "Request Test") }}
+              </button>
+            </div>
+          </div>
+        </form>
+      </div>
+
+      <div class="appointments-card">
+        <div class="table-responsive" *ngIf="!isLoading">
+          <p-table
+            [value]="tests"
+            responsiveLayout="scroll"
+            styleClass="data-table"
+          >
+            <ng-template pTemplate="header">
+              <tr>
+                <th>Test Name</th>
+                <th>Test Code</th>
+                <th>Price</th>
+                <th>Patient</th>
+                <th>Doctor</th>
+                <th>Status</th>
+                <th>Requested</th>
+                <th>Actions</th>
+              </tr>
+            </ng-template>
+            <ng-template pTemplate="body" let-test>
+              <tr>
+                <td>
+                  <div class="test-info">
+                    <i class="ri-test-tube-line"></i>
+                    <strong>{{ test.testName }}</strong>
+                  </div>
+                </td>
+                <td>{{ test.testCode }}</td>
+                <td>
+                  <strong>₹{{ test.price | number: "1.2-2" }}</strong>
+                </td>
+                <td>{{ test.patientName }}</td>
+                <td>{{ test.doctorName || "-" }}</td>
+                <td>
+                  <span
+                    class="status-badge"
+                    [ngClass]="getStatusClass(test.status)"
+                  >
+                    {{ test.status.replace("_", " ") }}
+                  </span>
+                </td>
+                <td>{{ test.requestedDate | date: "MMM d, h:mm a" }}</td>
+                <td>
+                  <div class="action-buttons">
+                    <button
+                      class="btn-icon btn-play"
+                      title="Mark In Progress"
+                      *ngIf="
+                        test.status === TestStatus.PENDING && userRole === 'LABORATORY_STAFF'
+                      "
+                      (click)="onUpdateStatus(test, TestStatus.IN_PROGRESS)"
+                    >
+                      <i class="ri-play-line"></i>
+                    </button>
+                    <!-- Record Test Results (Available when In Progress) -->
+                    <button
+                      class="btn-icon btn-edit"
+                      title="Record Test Results"
+                      *ngIf="
+                        test.status === TestStatus.IN_PROGRESS &&
+                        userRole === 'LABORATORY_STAFF'
+                      "
+                      (click)="openRecordResults(test)"
+                    >
+                      <i class="ri-file-edit-line"></i>
+                    </button>
+
+                    <button
+                      class="btn-icon btn-view"
+                      title="View Report"
+                      *ngIf="test.status === TestStatus.COMPLETED"
+                      (click)="openRecordResults(test)"
+                    >
+                      <i class="ri-eye-line"></i>
+                    </button>
+
+                    <button
+                      class="btn-icon btn-edit"
+                      title="Edit"
+                      *ngIf="userRole === 'ADMIN' || userRole === 'LABORATORY_STAFF'"
+                      (click)="openEditForm(test)"
+                    >
+                      <i class="ri-edit-line"></i>
+                    </button>
+
+                    <button
+                      class="btn-icon btn-delete"
+                      title="Delete"
+                      *ngIf="userRole === 'ADMIN' || userRole === 'LABORATORY_STAFF'"
+                      (click)="onDelete(test.id)"
+                    >
+                      <i class="ri-delete-bin-line"></i>
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            </ng-template>
+          </p-table>
+        </div>
+
+        <div class="loading-state" *ngIf="isLoading">
+          <i class="ri-loader-4-line spin"></i>
+          <p>Loading lab tests...</p>
+        </div>
+
+        <div class="empty-state" *ngIf="!isLoading && tests.length === 0">
+          <i class="ri-test-tube-line"></i>
+          <h3>No lab tests found</h3>
+          <p>Request the first lab test for a patient.</p>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<!-- Record Test Results Dialog Component -->
+<app-record-test-results
+  *ngIf="showRecordResults"
+  [visible]="showRecordResults"
+  [labTest]="selectedTest"
+  (recorded)="closeRecordResults()"
+  (closed)="closeRecordResults()"
+></app-record-test-results>

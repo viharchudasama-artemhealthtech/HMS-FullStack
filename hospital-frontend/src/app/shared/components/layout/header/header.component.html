@@ -1,0 +1,61 @@
+<header class="main-header">
+  <div class="header-intro">
+    <div class="search-bar">
+      <i class="ri-search-line"></i>
+      <input type="text" placeholder="Search patients, doctors, appointments...">
+    </div>
+    <div class="header-date">
+      <i class="ri-calendar-2-line"></i>
+      <span>{{ today | date:'EEEE, MMM d' }}</span>
+    </div>
+  </div>
+
+  <div class="header-actions">
+    <button class="action-btn" type="button" (click)="toggleNotifications()">
+      <i class="ri-notification-3-line"></i>
+      <span class="badge" *ngIf="unreadCount > 0">{{ unreadCount > 9 ? '9+' : unreadCount }}</span>
+    </button>
+    
+    <button class="action-btn logout-header-btn" title="Sign Out" (click)="onLogout()">
+      <i class="ri-logout-box-r-line"></i>
+    </button>
+    
+    <div class="user-profile" *ngIf="user">
+      <div class="user-info">
+        <span class="username">{{ user.username }}</span>
+        <span class="role">{{ roleLabel }}</span>
+      </div>
+      <div class="avatar">
+        <img [src]="'https://ui-avatars.com/api/?name=' + user.username + '&background=0f6cbd&color=fff'" alt="User">
+      </div>
+    </div>
+  </div>
+
+  <div class="notification-panel" *ngIf="isNotificationPanelOpen">
+    <div class="notification-panel__header">
+      <div>
+        <strong>Notifications</strong>
+        <small>Recent system activity</small>
+      </div>
+      <button type="button" class="clear-btn" (click)="clearNotifications()">Clear</button>
+    </div>
+
+    <div class="notification-list" *ngIf="notifications.length > 0; else emptyNotifications">
+      <article class="notification-item" *ngFor="let notification of notifications; trackBy: trackByNotificationId" [ngClass]="notification.type">
+        <div class="notification-dot"></div>
+        <div class="notification-copy">
+          <strong>{{ notification.title }}</strong>
+          <p>{{ notification.message }}</p>
+          <small>{{ notification.createdAt | date:'MMM d, h:mm a' }}</small>
+        </div>
+      </article>
+    </div>
+
+    <ng-template #emptyNotifications>
+      <div class="notification-empty">
+        <i class="ri-notification-off-line"></i>
+        <span>No notifications yet</span>
+      </div>
+    </ng-template>
+  </div>
+</header>

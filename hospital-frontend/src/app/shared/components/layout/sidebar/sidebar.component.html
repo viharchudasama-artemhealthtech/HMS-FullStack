@@ -1,0 +1,37 @@
+<aside class="sidebar">
+  <div class="sidebar-header">
+    <div class="logo-block">
+      <div class="logo-mark">
+        <i class="ri-hospital-line"></i>
+      </div>
+      <div class="logo-copy">
+        <span>HMS Core</span>
+        <small>Unified care operations</small>
+      </div>
+    </div>
+    <div class="facility-chip">24/7 Care Hub</div>
+  </div>
+
+  <nav class="sidebar-nav" *ngIf="currentUser$ | async as user">
+    <div class="nav-section">
+      <span class="section-title">Navigation</span>
+      <ng-container *ngFor="let item of menuItems">
+        <a *ngIf="canView(item, user)" [routerLink]="item.link" routerLinkActive="active" class="nav-item">
+          <i [class]="item.icon"></i>
+          <span class="nav-copy">
+            <strong>{{item.title}}</strong>
+            <small>{{ item.summary }}</small>
+          </span>
+        </a>
+      </ng-container>
+    </div>
+  </nav>
+
+  <div class="sidebar-footer">
+    <div class="support-card" *ngIf="currentUser$ | async as user">
+      <span class="support-label">Signed in as</span>
+      <strong>{{ user.username }}</strong>
+      <small>{{ user.role }}</small>
+    </div>
+  </div>
+</aside>

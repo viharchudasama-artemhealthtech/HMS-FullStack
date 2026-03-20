@@ -1,0 +1,81 @@
+<div class="dashboard-layout">
+  <app-sidebar></app-sidebar>
+  
+  <main class="main-content">
+    <app-header></app-header>
+
+    <div class="page-body">
+      <div class="content-header">
+        <div class="title-section">
+          <h1>Stock Movement Log</h1>
+          <p>Track all incoming and outgoing medicine stock entries</p>
+        </div>
+        <div class="header-actions">
+          <div class="search-bar">
+            <i class="ri-search-line"></i>
+            <input pInputText type="text" (input)="onSearch($event)" placeholder="Search logs...">
+          </div>
+        </div>
+      </div>
+
+      <div class="appointments-card">
+        <div class="table-responsive" *ngIf="!isLoading">
+          <p-table [value]="filteredTransactions" [rows]="10" [paginator]="true" [rowsPerPageOptions]="[10, 25, 50]" 
+                   responsiveLayout="scroll" styleClass="data-table">
+            <ng-template pTemplate="header">
+              <tr>
+                <th pSortableColumn="createdAt">Timestamp <i class="ri-sort-asc"></i></th>
+                <th pSortableColumn="medicineName">Medicine <i class="ri-sort-asc"></i></th>
+                <th>Type</th>
+                <th>Quantity</th>
+                <th>User / Admin</th>
+                <th>Details</th>
+                <th>Reference</th>
+              </tr>
+            </ng-template>
+            <ng-template pTemplate="body" let-tx>
+              <tr>
+                <td>{{tx.createdAt | date:'short'}}</td>
+                <td>
+                  <div class="med-name">
+                    <strong>{{tx.medicineName}}</strong>
+                    <small class="code-badge small">{{tx.medicineCode}}</small>
+                  </div>
+                </td>
+                <td>
+                  <span class="status-badge" [ngClass]="tx.transactionType === 'IN' ? 'status-completed' : 'status-cancelled'">
+                    {{tx.transactionType}}
+                  </span>
+                </td>
+                <td>
+                  <div class="stock-info">
+                    <span [class.text-success]="tx.transactionType === 'IN'" [class.text-danger]="tx.transactionType === 'OUT'" class="fw-bold fs-6">
+                      {{tx.transactionType === 'IN' ? '+' : '-'}}{{tx.quantity}}
+                    </span>
+                  </div>
+                </td>
+                <td><span class="text-muted">{{tx.createdBy}}</span></td>
+                <td><span class="text-muted small">{{tx.notes || 'N/A'}}</span></td>
+                <td>
+                  <span class="code-badge" *ngIf="tx.referenceId">{{tx.referenceId | slice:0:8}}...</span>
+                  <span class="text-muted" *ngIf="!tx.referenceId">-</span>
+                </td>
+              </tr>
+            </ng-template>
+          </p-table>
+        </div>
+
+        <div class="loading-state" *ngIf="isLoading">
+          <i class="ri-loader-4-line spin"></i>
+          <p>Loading transaction history...</p>
+        </div>
+
+        <div class="empty-state" *ngIf="!isLoading && transactions.length === 0">
+          <i class="ri-history-line"></i>
+          <h3>Log is empty</h3>
+          <p>No stock transactions found yet.</p>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>

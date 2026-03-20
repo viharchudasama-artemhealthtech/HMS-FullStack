@@ -1,0 +1,181 @@
+<div class="dashboard-layout">
+  <app-sidebar></app-sidebar>
+  
+  <main class="main-content">
+    <app-header></app-header>
+
+    <div class="page-body">
+      <div class="content-header">
+        <div class="title-section">
+          <h1>{{ isEditMode ? 'Edit Patient' : 'Register New Patient' }}</h1>
+          <p>{{ isEditMode ? 'Update an existing patient profile in the hospital system' : 'Register a new patient into the hospital system' }}</p>
+        </div>
+        <div class="header-actions">
+          <button class="btn-outline" routerLink="/patients">
+            <i class="ri-arrow-left-line"></i> Back to Directory
+          </button>
+        </div>
+      </div>
+
+      <div class="registration-form-card">
+        <form [formGroup]="registrationForm" (ngSubmit)="onSubmit()">
+          <div class="form-shell">
+          <div class="form-section">
+            <div class="section-title">
+              <div class="section-icon"><i class="ri-user-settings-line"></i></div>
+              <div class="section-copy">
+                <h3>Personal Information</h3>
+                <p>Core identity and contact details for the patient profile.</p>
+              </div>
+            </div>
+            
+            <div class="form-grid two-column">
+              <div class="form-group full-width">
+                <label class="form-label" for="name">Full Name</label>
+                <div class="input-wrapper">
+                  <i class="ri-user-line icon"></i>
+                  <input pInputText type="text" id="name" formControlName="name" class="form-control" placeholder="Enter patient's full name">
+                </div>
+                <div class="error-msg" *ngIf="registrationForm.get('name')?.touched && registrationForm.get('name')?.invalid">
+                  <small>Full name is required (max 200 chars)</small>
+                </div>
+              </div>
+
+              <div class="form-group full-width">
+                <label class="form-label" for="email">Email Address</label>
+                <div class="input-wrapper">
+                  <i class="ri-mail-line icon"></i>
+                  <input pInputText type="email" id="email" formControlName="email" class="form-control" placeholder="patient@example.com">
+                </div>
+                <div class="error-msg" *ngIf="registrationForm.get('email')?.touched && registrationForm.get('email')?.invalid">
+                  <small>Valid email is required</small>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="age">Age</label>
+                <p-inputNumber inputId="age" formControlName="age" [useGrouping]="false" placeholder="Entry age"></p-inputNumber>
+                <div class="error-msg" *ngIf="registrationForm.get('age')?.touched && registrationForm.get('age')?.invalid">
+                  <small>Valid age (0-120) is required</small>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="contactNumber">Contact Number</label>
+                <div class="input-wrapper">
+                  <i class="ri-phone-line icon"></i>
+                  <input pInputText type="text" id="contactNumber" formControlName="contactNumber" class="form-control" placeholder="10-digit number" pKeyFilter="num" maxlength="10">
+                </div>
+                <div class="error-msg" *ngIf="registrationForm.get('contactNumber')?.touched && registrationForm.get('contactNumber')?.invalid">
+                  <small>Exactly 10 digits are required</small>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="bloodGroup">Blood Group</label>
+                <p-dropdown
+                  inputId="bloodGroup"
+                  formControlName="bloodGroup"
+                  [options]="bloodGroupOptions()"
+                  optionLabel="label"
+                  optionValue="value"
+                  styleClass="w-full"
+                  [filter]="true"
+                  filterPlaceholder="Search blood group..."
+                  placeholder="Select Blood Group"
+                >
+                  <ng-template pTemplate="item" let-item>
+                    <div class="dropdown-item-with-icon">
+                      <i class="ri-drop-line blood-icon"></i>
+                      <span>{{item.label}}</span>
+                    </div>
+                  </ng-template>
+                </p-dropdown>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="urgencyLevel">Urgency Level</label>
+                <p-dropdown
+                  inputId="urgencyLevel"
+                  formControlName="urgencyLevel"
+                  [options]="urgencyOptions()"
+                  optionLabel="label"
+                  optionValue="value"
+                  styleClass="w-full"
+                  [filter]="true"
+                  filterPlaceholder="Search urgency..."
+                  placeholder="Select Urgency"
+                >
+                  <ng-template pTemplate="item" let-item>
+                    <div class="dropdown-item-with-icon">
+                      <i class="ri-alert-line urgency-icon" [ngClass]="getUrgencyClass(item.value)"></i>
+                      <span>{{item.label}}</span>
+                    </div>
+                  </ng-template>
+                </p-dropdown>
+                <div class="error-msg" *ngIf="registrationForm.get('urgencyLevel')?.touched && registrationForm.get('urgencyLevel')?.invalid">
+                  <small>Urgency level is required</small>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Clinical Details Section -->
+          <div class="form-section">
+            <div class="section-title">
+              <div class="section-icon"><i class="ri-capsule-line"></i></div>
+              <div class="section-copy">
+                <h3>Clinical Details</h3>
+                <p>Capture intake notes, treatment context, and consultation cost.</p>
+              </div>
+            </div>
+            
+            <div class="form-grid two-column">
+              <div class="form-group full-width">
+                <label class="form-label" for="prescription">Initial Diagnosis / Complaint</label>
+                <textarea pInputTextarea id="prescription" formControlName="prescription" class="form-control" rows="3" placeholder="Describe symptoms or diagnosis..."></textarea>
+                <div class="error-msg" *ngIf="registrationForm.get('prescription')?.touched && registrationForm.get('prescription')?.invalid">
+                  <small>Diagnosis is required</small>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="dose">Initial Dosage / Treatment</label>
+                <input pInputText type="text" id="dose" formControlName="dose" class="form-control" placeholder="E.g. Paracetamol 500mg">
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="fees">Consultation Fees ($)</label>
+                <div class="input-wrapper accent-panel">
+                  <i class="ri-money-dollar-circle-line icon"></i>
+                  <p-inputNumber inputId="fees" formControlName="fees" mode="decimal" [min]="0" [minFractionDigits]="2" [maxFractionDigits]="2" placeholder="0.00"></p-inputNumber>
+                </div>
+                <div class="error-msg" *ngIf="registrationForm.get('fees')?.touched && registrationForm.get('fees')?.invalid">
+                  <small>Valid fee is required</small>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="success-alert" *ngIf="successMessage">
+            <i class="ri-checkbox-circle-line"></i> {{ successMessage }}
+          </div>
+
+          <div class="error-alert" *ngIf="errorMessage">
+            <i class="ri-error-warning-line"></i> {{ errorMessage }}
+          </div>
+
+          <div class="form-actions">
+            <button type="button" class="btn-outline" routerLink="/patients">Cancel</button>
+            <button type="submit" class="btn-primary" [disabled]="isLoading">
+              <i class="ri-save-line" *ngIf="!isLoading"></i>
+              <i class="ri-loader-4-line spin" *ngIf="isLoading"></i>
+              {{ isLoading ? (isEditMode ? 'Saving...' : 'Registering...') : (isEditMode ? 'Save Changes' : 'Complete Registration') }}
+            </button>
+          </div>
+          </div>
+        </form>
+      </div>
+    </div>
+  </main>
+</div>

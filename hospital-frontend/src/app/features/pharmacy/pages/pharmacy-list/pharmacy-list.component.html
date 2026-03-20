@@ -1,0 +1,180 @@
+<div class="dashboard-layout">
+  <app-sidebar></app-sidebar>
+  
+  <main class="main-content">
+    <app-header></app-header>
+
+    <div class="page-body">
+      <div class="content-header">
+        <div class="title-section">
+          <h1>Pharmacy Inventory</h1>
+          <p>Manage medicines, stock levels and dispensing</p>
+        </div>
+        <div class="header-actions">
+          <button class="btn-outline" [class.active]="showLowStockOnly" (click)="toggleLowStock()">
+            <i class="ri-alarm-warning-line"></i>
+            {{ showLowStockOnly ? 'All Medicines' : 'Low Stock' }}
+          </button>
+          <button class="btn-primary" *ngIf="userRole === 'ADMIN' || userRole === 'PHARMACIST'" (click)="openAddForm()">
+            <i class="ri-add-line"></i> Add Medicine
+          </button>
+        </div>
+      </div>
+
+      <div class="success-alert" *ngIf="successMessage">
+        <i class="ri-checkbox-circle-line"></i> {{ successMessage }}
+      </div>
+      <div class="error-alert" *ngIf="errorMessage">
+        <i class="ri-error-warning-line"></i> {{ errorMessage }}
+      </div>
+
+      <div class="search-bar-row">
+        <div class="search-bar">
+          <i class="ri-search-line"></i>
+          <input pInputText type="text" placeholder="Search medicines by name, code or category..." (input)="onSearch($event)">
+        </div>
+        <button class="btn-excel" (click)="exportToExcel()" *ngIf="medicines.length > 0">
+          <i class="ri-file-excel-2-line"></i> Download Excel
+        </button>
+      </div>
+
+      <div class="form-card form-card-elevated" *ngIf="showAddForm || showEditForm">
+        <div class="form-card-header">
+          <h3>{{ showEditForm ? 'Edit Medicine' : 'Add New Medicine' }}</h3>
+          <button class="icon-btn" (click)="closeForm()"><i class="ri-close-line"></i></button>
+        </div>
+        <form [formGroup]="medicineForm" (ngSubmit)="onSubmit()">
+          <div class="form-shell">
+          <div class="form-section section-wide">
+            <div class="section-title">
+              <div class="section-icon"><i class="ri-capsule-line"></i></div>
+              <div class="section-copy">
+                <h3>Medicine Details</h3>
+                <p>Set the core inventory profile, pricing, stock levels, and expiry tracking.</p>
+              </div>
+            </div>
+          <div class="form-grid two-column">
+            <div class="form-group">
+              <label class="form-label">Medicine Name *</label>
+              <input pInputText type="text" formControlName="name" class="form-control" placeholder="e.g. Paracetamol 500mg">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Medicine Code *</label>
+              <input pInputText type="text" formControlName="medicineCode" class="form-control" placeholder="e.g. PCM-500">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Category *</label>
+              <p-dropdown 
+                formControlName="category" 
+                [options]="categoryOptions()" 
+                optionLabel="label" 
+                optionValue="value" 
+                [filter]="true"
+                filterPlaceholder="Search category..."
+                placeholder="Select Category..." 
+                styleClass="w-full"
+              ></p-dropdown>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Manufacturer *</label>
+              <input pInputText type="text" formControlName="manufacturer" class="form-control" placeholder="e.g. Sun Pharma">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Unit Price (INR) *</label>
+              <p-inputNumber formControlName="unitPrice" mode="decimal" [min]="0" [minFractionDigits]="2" [maxFractionDigits]="2"></p-inputNumber>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Stock Quantity *</label>
+              <p-inputNumber formControlName="quantityInStock" [useGrouping]="false" [min]="0"></p-inputNumber>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Minimum Stock Level *</label>
+              <p-inputNumber formControlName="reorderLevel" [useGrouping]="false" [min]="0"></p-inputNumber>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Expiry Date</label>
+              <p-calendar formControlName="expiryDate" [showIcon]="true" dateFormat="yy-mm-dd" styleClass="w-full"></p-calendar>
+            </div>
+            <div class="form-group full-width">
+              <label class="form-label">Description</label>
+              <textarea pInputTextarea formControlName="description" class="form-control" rows="2" placeholder="Optional notes..."></textarea>
+            </div>
+          </div>
+          </div>
+          <div class="form-actions">
+            <button type="button" class="btn-outline" (click)="closeForm()">Cancel</button>
+            <button type="submit" class="btn-primary" [disabled]="isSubmitting">
+              {{ isSubmitting ? 'Saving...' : (showEditForm ? 'Update Medicine' : 'Add Medicine') }}
+            </button>
+          </div>
+          </div>
+        </form>
+      </div>
+
+      <div class="appointments-card">
+        <div class="table-responsive" *ngIf="!isLoading">
+          <p-table [value]="filteredMedicines" responsiveLayout="scroll" styleClass="data-table">
+            <ng-template pTemplate="header">
+              <tr>
+                <th>Medicine</th>
+                <th>Code</th>
+                <th>Category</th>
+                <th>Manufacturer</th>
+                <th>Price (INR)</th>
+                <th>Stock</th>
+                <th>Status</th>
+                <th *ngIf="userRole === 'ADMIN' || userRole === 'PHARMACIST'">Actions</th>
+              </tr>
+            </ng-template>
+            <ng-template pTemplate="body" let-med>
+              <tr [class.low-stock-row]="isLowStock(med)">
+                <td>
+                  <div class="med-name">
+                    <strong>{{ med.name }}</strong>
+                    <small *ngIf="med.expiryDate">Exp: {{ med.expiryDate | date:'MMM yyyy' }}</small>
+                  </div>
+                </td>
+                <td><span class="code-badge">{{ med.medicineCode }}</span></td>
+                <td>{{ med.category }}</td>
+                <td>{{ med.manufacturer }}</td>
+                <td class="price">INR {{ med.unitPrice | number:'1.2-2' }}</td>
+                <td>
+                  <div class="stock-info">
+                    <span [class.low]="isLowStock(med)" [class.ok]="!isLowStock(med)">{{ med.quantityInStock }}</span>
+                    <small>/ min {{ med.reorderLevel }}</small>
+                  </div>
+                </td>
+                <td>
+                  <span class="status-badge" [ngClass]="isLowStock(med) ? 'status-cancelled' : 'status-completed'">
+                    {{ isLowStock(med) ? 'Low Stock' : 'In Stock' }}
+                  </span>
+                </td>
+                <td *ngIf="userRole === 'ADMIN' || userRole === 'PHARMACIST'">
+                  <div class="action-buttons">
+                    <button class="btn-icon start" title="Edit" (click)="openEditForm(med)">
+                      <i class="ri-edit-line"></i>
+                    </button>
+                    <button class="btn-icon checkin" title="Delete" (click)="onDelete(med.id)" *ngIf="userRole === 'ADMIN' || userRole === 'PHARMACIST'">
+                      <i class="ri-delete-bin-line"></i>
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            </ng-template>
+          </p-table>
+        </div>
+
+        <div class="loading-state" *ngIf="isLoading">
+          <i class="ri-loader-4-line spin"></i>
+          <p>Loading inventory...</p>
+        </div>
+
+        <div class="empty-state" *ngIf="!isLoading && filteredMedicines.length === 0">
+          <i class="ri-capsule-line"></i>
+          <h3>No medicines found</h3>
+          <p>{{ showLowStockOnly ? 'No low stock items.' : 'Add medicines to build your inventory.' }}</p>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>

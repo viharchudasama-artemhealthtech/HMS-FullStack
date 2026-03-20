@@ -1,0 +1,165 @@
+<div class="dashboard-layout">
+  <app-sidebar></app-sidebar>
+  
+  <main class="main-content">
+    <app-header></app-header>
+
+    <div class="page-body">
+      <div class="page-header">
+        <div class="welcome">
+          <h1>Vitals Collection Hub</h1>
+          <p>Monitor and record vital signs for today's active patient appointments.</p>
+        </div>
+      </div>
+
+      <div class="card p-0 table-container">
+        <div class="loading-overlay" *ngIf="isLoading">
+          <span class="spinner"></span>
+          <p>Syncing Clinical Appointments...</p>
+        </div>
+
+        <div class="table-responsive" *ngIf="!isLoading && appointments.length > 0">
+          <p-table
+            [value]="appointments"
+            [paginator]="true"
+            [rows]="10"
+            styleClass="p-datatable-sm clinical-table"
+            responsiveLayout="stack"
+          >
+            <ng-template pTemplate="header">
+              <tr>
+                <th style="width: 25%">Patient Name</th>
+                <th style="width: 20%">Appointment Time</th>
+                <th style="width: 15%">Status</th>
+                <th style="width: 15%">Data Status</th>
+                <th style="width: 25%" style="text-align: center;">Clinical Actions</th>
+              </tr>
+            </ng-template>
+
+            <ng-template pTemplate="body" let-apt>
+              <tr>
+                <td class="patient-cell">
+                  <div class="avatar-sm" [ngClass]="getStatusClass(apt.status)">
+                    {{ apt.patientName | slice:0:1 }}
+                  </div>
+                  <span class="name">{{ apt.patientName }}</span>
+                </td>
+                <td class="date-cell">{{ apt.appointmentTime | date: "medium" }}</td>
+                <td>
+                  <span class="badge" [ngClass]="getStatusClass(apt.status)">
+                    {{ apt.status }}
+                  </span>
+                </td>
+                <td>
+                  <span class="data-badge" [ngClass]="apt.vitals ? 'collected' : 'pending'">
+                    <i [class]="apt.vitals ? 'ri-check-line' : 'ri-time-line'"></i>
+                    {{ apt.vitals ? 'Recorded' : 'Not Collected' }}
+                  </span>
+                </td>
+                <td class="action-cell">
+                  <div class="btn-group">
+                    <!-- Collect Vitals (if not already recorded) -->
+                    <button 
+                      class="btn-sm-primary" 
+                      *ngIf="!apt.vitals && canManageVitals()" 
+                      (click)="openCollectVitals(apt.id)"
+                      [disabled]="apt.status === 'CANCELLED' || apt.status === 'COMPLETED'"
+                    >
+                      <i class="ri-heart-pulse-line"></i> Collect Vitals
+                    </button>
+
+                    <!-- View Recorded Vitals -->
+                    <button 
+                      class="btn-sm-outline" 
+                      *ngIf="apt.vitals" 
+                      (click)="viewVitals(apt.vitals)"
+                    >
+                      <i class="ri-eye-line"></i> View Report
+                    </button>
+
+                    <!-- Role-based Delete for Recorded Vitals -->
+                    <button 
+                      class="btn-sm-danger" 
+                      *ngIf="apt.vitals && canManageVitals()" 
+                      (click)="deleteVitals(apt.vitals.id)"
+                      title="Delete measurement"
+                    >
+                      <i class="ri-delete-bin-line"></i>
+                    </button>
+                    
+                    <span class="no-action-hint" *ngIf="apt.status === 'CANCELLED'">Visit Cancelled</span>
+                  </div>
+                </td>
+              </tr>
+            </ng-template>
+          </p-table>
+        </div>
+
+        <div class="empty-state" *ngIf="!isLoading && appointments.length === 0">
+          <i class="ri-history-line"></i>
+          <h3>All caught up!</h3>
+          <p>No active appointments require vitals collection at this moment.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Vitals Management Modal -->
+    <p-dialog 
+      [(visible)]="vitalsDialogVisible" 
+      [header]="isReadOnly ? 'Clinical Assessment' : (editingVitalsId ? 'Update Vitals' : 'Record Initial Vitals')" 
+      [modal]="true" 
+      [draggable]="false" 
+      [resizable]="false"
+      styleClass="clinical-modal"
+    >
+      <form [formGroup]="vitalsForm" (ngSubmit)="saveVitals()" class="vitals-form">
+        <div class="form-grid-modal">
+          <div class="form-group">
+            <label>Temperature (°C)</label>
+            <input type="number" formControlName="temperature" placeholder="37.0">
+          </div>
+          <div class="form-group">
+            <label>Systolic BP</label>
+            <input type="number" formControlName="systolicBP" placeholder="120">
+          </div>
+          <div class="form-group">
+            <label>Diastolic BP</label>
+            <input type="number" formControlName="diastolicBP" placeholder="80">
+          </div>
+          <div class="form-group">
+            <label>Pulse Rate (BPM)</label>
+            <input type="number" formControlName="pulseRate" placeholder="72">
+          </div>
+          <div class="form-group">
+            <label>SPO2 (%)</label>
+            <input type="number" formControlName="spo2" placeholder="98">
+          </div>
+          <div class="form-group">
+            <label>Weight (kg)</label>
+            <input type="number" formControlName="weight" placeholder="70">
+          </div>
+        </div>
+
+        <div class="form-group full-width">
+          <label>Clinical Notes</label>
+          <textarea formControlName="notes" rows="3" placeholder="Add any specific observations..."></textarea>
+        </div>
+
+        <div class="modal-footer">
+          <!-- Only show Edit button in Read-only Mode -->
+          <button type="button" class="btn-primary" *ngIf="isReadOnly && canManageVitals()" (click)="editFromView()">
+            <i class="ri-edit-line"></i> Unlock to Edit
+          </button>
+          
+          <button type="button" class="btn-secondary" (click)="vitalsDialogVisible = false">{{ isReadOnly ? 'Close' : 'Cancel' }}</button>
+          
+          <button type="submit" class="btn-primary" *ngIf="!isReadOnly" [disabled]="vitalsForm.invalid || isSavingVitals">
+            <span class="spinner-sm" [class.show]="isSavingVitals"></span>
+            {{ editingVitalsId ? 'Save Updates' : 'Commit Changes' }}
+          </button>
+        </div>
+      </form>
+    </p-dialog>
+
+  </main>
+</div>

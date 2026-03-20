@@ -1,0 +1,214 @@
+<div class="dashboard-layout">
+    <app-sidebar></app-sidebar>
+  
+    <div class="main-content">
+      <app-header></app-header>
+  
+      <main class="page-body">
+        <div class="page-header">
+          <a routerLink="/appointments" class="back-link">
+            <i class="ri-arrow-left-line"></i> Back to Appointments
+          </a>
+          <h1>Finalize Prescription</h1>
+        </div>
+
+        <div class="error-alert" *ngIf="errorMessage">
+          <i class="ri-error-warning-line"></i> {{ errorMessage }}
+        </div>
+
+        <!-- Patient Context Bar -->
+        <div class="patient-context-bar" *ngIf="appointment">
+          <div class="patient-info">
+            <div class="avatar-circle">
+              {{ patientName | slice:0:1 }}
+            </div>
+            <div class="details">
+              <h2>{{ patientName }}</h2>
+              <p>
+                <span>ID: {{ patientId | slice:0:8 }}</span>
+                <span>Reason: {{ appointment.reason }}</span>
+              </p>
+            </div>
+          </div>
+          <div class="visit-meta">
+            <span class="badge">{{ appointment.department }}</span>
+            <span class="token" *ngIf="appointment.tokenNumber">Token #{{ appointment.tokenNumber }}</span>
+          </div>
+        </div>
+  
+        <div class="form-container">
+          <form [formGroup]="prescriptionForm" (ngSubmit)="onSubmit()">
+            <div class="form-shell">
+              
+              <!-- Clinical Summary Section -->
+              <div class="section section-wide">
+                <div class="section-title">
+                  <div class="section-icon"><i class="ri-file-medical-line"></i></div>
+                  <div class="section-copy">
+                    <h3>Clinical Summary</h3>
+                    <p>Document observations, patient-reported symptoms, and initial diagnosis.</p>
+                  </div>
+                </div>
+                <div class="form-grid two-column">
+                  <div class="form-group full-width">
+                    <label>Chief Complaints & Symptoms</label>
+                    <textarea 
+                      formControlName="symptoms" 
+                      rows="3" 
+                      placeholder="e.g. Fever for 3 days, sore throat..."
+                    ></textarea>
+                  </div>
+                  <div class="form-group full-width">
+                    <label>Diagnosis / Assessment *</label>
+                    <textarea 
+                      formControlName="diagnosis" 
+                      rows="3" 
+                      placeholder="e.g. Acute Pharyngitis, suspected Strep infection..."
+                      [class.is-invalid]="prescriptionForm.get('diagnosis')?.invalid && prescriptionForm.get('diagnosis')?.touched"
+                    ></textarea>
+                    <div class="error-hint" *ngIf="prescriptionForm.get('diagnosis')?.invalid && prescriptionForm.get('diagnosis')?.touched">
+                      Diagnosis is required (min 2 characters).
+                    </div>
+                  </div>
+                </div>
+              </div>
+  
+              <!-- Medicines Section -->
+              <div class="section">
+                <div class="section-header">
+                  <h3><i class="ri-capsule-line"></i> Medication Details</h3>
+                  <button type="button" class="btn-add" (click)="addMedicine()">
+                    <i class="ri-add-line"></i> Add Medication
+                  </button>
+                </div>
+  
+                <div formArrayName="medicines" class="medicine-card-list">
+                  <div *ngFor="let med of medicines.controls; let i=index" [formGroupName]="i" class="medicine-card">
+                    <div class="card-header">
+                      <div class="med-info-group">
+                        <span class="med-badge"><i class="ri-medicine-bottle-line"></i> Medication #{{ i + 1 }}</span>
+                        <button type="button" class="btn-report-stock" (click)="reportMedicine(i)" title="Report as Needed/Low Stock">
+                          <i class="ri-notification-3-line"></i> Report Stock
+                        </button>
+                      </div>
+                      <button 
+                        type="button" 
+                        class="btn-icon-danger" 
+                        (click)="removeMedicine(i)" 
+                        *ngIf="medicines.length > 1"
+                        title="Remove"
+                      >
+                        <i class="ri-delete-bin-line"></i>
+                      </button>
+                    </div>
+                    <div class="med-grid">
+                      <div class="form-group">
+                        <label>Medicine Name *</label>
+                        <p-autoComplete 
+                          formControlName="medicineName" 
+                          [suggestions]="filteredMedicines" 
+                          (completeMethod)="filterMedicines($event)"
+                          (onSelect)="onMedicineSelect($event, i)"
+                          field="name"
+                          placeholder="Search medicines by name or code..."
+                          [forceSelection]="false"
+                          [dropdown]="true"
+                        >
+                          <ng-template let-med pTemplate="item">
+                            <div class="med-option">
+                              <span class="med-name">{{ med.name }} - {{ med.medicineCode }}</span>
+                              <div class="med-stock">
+                                <i class="ri-checkbox-circle-line in-stock" *ngIf="med.quantityInStock > med.reorderLevel"></i>
+                                <i class="ri-error-warning-line low-stock" *ngIf="med.quantityInStock <= med.reorderLevel && med.quantityInStock > 0"></i>
+                                <i class="ri-close-circle-line out-of-stock" *ngIf="med.quantityInStock <= 0"></i>
+                                <span [ngClass]="{
+                                  'in-stock': med.quantityInStock > med.reorderLevel,
+                                  'low-stock': med.quantityInStock <= med.reorderLevel && med.quantityInStock > 0,
+                                  'out-of-stock': med.quantityInStock <= 0
+                                }">
+                                  In Stock: {{ med.quantityInStock }} ({{ med.category }})
+                                </span>
+                              </div>
+                            </div>
+                          </ng-template>
+                        </p-autoComplete>
+                      </div>
+                      <div class="form-group">
+                        <label>Dosage *</label>
+                        <input type="text" formControlName="dosage" placeholder="e.g. 1-0-1 (BID)">
+                      </div>
+                      <div class="form-group">
+                        <label>Duration *</label>
+                        <input type="text" formControlName="duration" placeholder="e.g. 5 Days">
+                      </div>
+                      <div class="form-group">
+                        <label>Total Quantity *</label>
+                        <div class="input-with-stock">
+                          <input 
+                            type="number" 
+                            formControlName="quantity" 
+                            placeholder="e.g. 10"
+                            [class.is-stock-error]="med.errors?.['insufficientStock']"
+                          >
+                          <span class="stock-label" *ngIf="med.get('availableStock')?.value">
+                            Stock: {{ med.get('availableStock')?.value }}
+                          </span>
+                        </div>
+                        <div class="error-hint danger" *ngIf="med.errors?.['insufficientStock']">
+                          Only {{ med.errors?.['insufficientStock']?.actual }} units available.
+                        </div>
+                      </div>
+                      <div class="form-group">
+                        <label>Special Instructions</label>
+                        <input type="text" formControlName="instructions" placeholder="e.g. After meals with warm water">
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+  
+              <!-- Advice & Notes Section -->
+              <div class="section">
+                <div class="section-title">
+                  <div class="section-icon"><i class="ri-mental-health-line"></i></div>
+                  <div class="section-copy">
+                    <h3>Instructions & Follow-up</h3>
+                    <p>Capture lifestyle advice for the patient and internal clinical observations.</p>
+                  </div>
+                </div>
+                <div class="form-grid two-column">
+                  <div class="form-group full-width">
+                    <label>Advice to Patient (Visible to User)</label>
+                    <textarea 
+                      formControlName="advice" 
+                      rows="2" 
+                      placeholder="e.g. Plenty of fluids, avoid cold water, salt water gargles..."
+                    ></textarea>
+                  </div>
+                  <div class="form-group full-width">
+                    <label>Internal Clinical Notes (Hidden from Patient)</label>
+                    <textarea 
+                      formControlName="notes" 
+                      rows="2" 
+                      placeholder="e.g. Recheck if symptoms persist for 48 hrs..."
+                    ></textarea>
+                  </div>
+                </div>
+              </div>
+  
+              <!-- Form Actions -->
+              <div class="form-actions">
+                <button type="button" class="btn-ghost" routerLink="/appointments">Discard</button>
+                <button type="submit" class="btn-primary-lg" [disabled]="prescriptionForm.invalid || isSubmitting">
+                  <i class="ri-save-line" *ngIf="!isSubmitting"></i>
+                  <span class="spinner" *ngIf="isSubmitting"></span>
+                  {{ isSubmitting ? 'Finalizing...' : 'Finalize & Save Prescription' }}
+                </button>
+              </div>
+            </div>
+          </form>
+        </div>
+      </main>
+    </div>
+  </div>
+  

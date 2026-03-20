@@ -1,0 +1,401 @@
+<div class="dashboard-layout">
+  <app-sidebar></app-sidebar>
+  
+  <main class="main-content">
+    <app-header></app-header>
+
+    <div class="page-body">
+      <div class="content-header">
+        <div class="title-section">
+          <h1>Billing & Invoices</h1>
+          <p>Manage patient invoices and payment records</p>
+        </div>
+        <div class="header-actions" *ngIf="userRole === 'ADMIN' || userRole === 'RECEPTIONIST'">
+          <button class="btn-outline" (click)="openAutoGenerateModal()">
+            <i class="ri-flashlight-line"></i> Auto-Generate
+          </button>
+          <button class="btn-primary" (click)="openCreateForm()">
+            <i class="ri-add-line"></i> Create Invoice
+          </button>
+        </div>
+      </div>
+
+      <div class="form-card form-card-elevated" *ngIf="showCreateForm">
+        <div class="form-card-header">
+          <h3><i class="ri-bill-line"></i> New Invoice</h3>
+          <button class="icon-btn" (click)="closeForm()"><i class="ri-close-line"></i></button>
+        </div>
+        <form [formGroup]="billingForm" (ngSubmit)="onSubmit()">
+          <div class="form-shell">
+          <div class="form-section section-wide">
+            <div class="section-title">
+              <div class="section-icon"><i class="ri-file-list-3-line"></i></div>
+              <div class="section-copy">
+                <h3>Invoice Details</h3>
+                <p>Configure patient billing metadata before adding line items.</p>
+              </div>
+            </div>
+          <div class="form-grid two-column">
+            <div class="form-group">
+              <label class="form-label">Patient *</label>
+              <p-dropdown formControlName="patientId" [options]="patientOptions()" optionLabel="label" optionValue="value" placeholder="Select patient..." styleClass="w-full"></p-dropdown>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Payment Method</label>
+              <p-dropdown formControlName="paymentMethod" [options]="paymentMethodOptions()" optionLabel="label" optionValue="value" styleClass="w-full"></p-dropdown>
+            </div>
+            <div class="form-group" *ngIf="manualPatientAppointments.length > 0">
+              <label class="form-label">Sync Appointment (Optional)</label>
+              <p-dropdown 
+                formControlName="appointment" 
+                [options]="manualPatientAppointments" 
+                placeholder="Pull data from encounter..." 
+                styleClass="w-full sync-dropdown"
+                (onChange)="onAppointmentSelectedForManual($event.value)"
+                [loading]="isSyncingItems">
+                  <ng-template let-selectedItem pTemplate="selectedItem">
+                    <div class="sync-option" *ngIf="selectedItem">
+                      <i class="ri-history-line"></i>
+                      <span>{{ selectedItem.appointmentTime | date:'dd MMM, HH:mm' }} - {{ selectedItem.department }}</span>
+                    </div>
+                  </ng-template>
+                  <ng-template let-item pTemplate="item">
+                    <div class="sync-option">
+                      <i class="ri-history-line"></i>
+                      <span>{{ item.appointmentTime | date:'dd MMM, HH:mm' }} - {{ item.department }}</span>
+                    </div>
+                  </ng-template>
+              </p-dropdown>
+              <small class="hint-text">Selecting an appointment will auto-fill line items.</small>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Tax Amount (INR)</label>
+              <p-inputNumber formControlName="taxAmount" mode="decimal" [min]="0" [minFractionDigits]="2" [maxFractionDigits]="2"></p-inputNumber>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Discount Amount (INR)</label>
+              <p-inputNumber formControlName="discountAmount" mode="decimal" [min]="0" [minFractionDigits]="2" [maxFractionDigits]="2"></p-inputNumber>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Due Date</label>
+              <p-calendar formControlName="dueDate" [showIcon]="true" dateFormat="yy-mm-dd" styleClass="w-full" [minDate]="today"></p-calendar>
+            </div>
+            <div class="form-group full-width">
+              <label class="form-label">Notes</label>
+              <textarea pInputTextarea formControlName="notes" class="form-control" rows="2"></textarea>
+            </div>
+          </div>
+          </div>
+
+          <div class="form-section section-wide" *ngIf="billingForm.get('paymentMethod')?.value === 'INSURANCE'">
+            <div class="section-title">
+              <div class="section-icon"><i class="ri-shield-check-line"></i></div>
+              <div class="section-copy">
+                <h3>Insurance Details</h3>
+                <p>Provide coverage details for this claim.</p>
+              </div>
+            </div>
+            <div class="form-grid three-column">
+              <div class="form-group">
+                <label class="form-label">Insurance Provider</label>
+                <input pInputText type="text" formControlName="insuranceProvider" class="form-control" placeholder="e.g. Star Health">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Claim Number</label>
+                <input pInputText type="text" formControlName="insuranceClaimNumber" class="form-control" placeholder="e.g. CL-102938">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Insurance Amount (INR)</label>
+                <p-inputNumber formControlName="insuranceAmount" mode="decimal" [min]="0" [minFractionDigits]="2" [maxFractionDigits]="2"></p-inputNumber>
+              </div>
+            </div>
+          </div>
+
+          <div class="items-section">
+            <div class="items-header">
+              <h4>Line Items</h4>
+              <button type="button" class="btn-small" (click)="addItem()">
+                <i class="ri-add-line"></i> Add Item
+              </button>
+            </div>
+            <div class="items-table">
+              <div class="item-header-row">
+                <span>Item Name</span>
+                <span>Qty</span>
+                <span>Unit Price (INR)</span>
+                <span>Total</span>
+                <span></span>
+              </div>
+              <div formArrayName="items">
+                <div *ngFor="let item of items.controls; let i = index" [formGroupName]="i" class="item-row">
+                  <input pInputText type="text" formControlName="itemName" class="form-control" placeholder="e.g. Consultation Fee">
+                  <p-inputNumber formControlName="quantity" [useGrouping]="false" [min]="1" styleClass="qty"></p-inputNumber>
+                  <p-inputNumber formControlName="unitPrice" mode="decimal" [min]="0" [minFractionDigits]="2" [maxFractionDigits]="2"></p-inputNumber>
+                  <span class="item-total">INR {{ getItemTotal(i) | number:'1.2-2' }}</span>
+                  <button type="button" class="remove-btn" (click)="removeItem(i)" *ngIf="items.length > 1">
+                    <i class="ri-delete-bin-line"></i>
+                  </button>
+                </div>
+              </div>
+            </div>
+            <div class="totals-box">
+              <div class="total-row"><span>Subtotal</span><span>INR {{ getSubtotal() | number:'1.2-2' }}</span></div>
+              <div class="total-row"><span>Tax</span><span>INR {{ billingForm.get('taxAmount')?.value || 0 | number:'1.2-2' }}</span></div>
+              <div class="total-row"><span>Discount</span><span>-INR {{ billingForm.get('discountAmount')?.value || 0 | number:'1.2-2' }}</span></div>
+              <div class="total-row net"><span>Net Total</span><span>INR {{ getNetTotal() | number:'1.2-2' }}</span></div>
+            </div>
+          </div>
+
+          <div class="form-actions">
+            <button type="button" class="btn-outline" (click)="closeForm()">Cancel</button>
+            <button type="submit" class="btn-primary" [disabled]="isSubmitting">
+              {{ isSubmitting ? 'Creating...' : 'Create Invoice' }}
+            </button>
+          </div>
+          </div>
+        </form>
+      </div>
+
+      <div class="appointments-card">
+        <div class="table-responsive" *ngIf="!isLoading">
+          <p-table [value]="billings" responsiveLayout="scroll" styleClass="data-table">
+            <ng-template pTemplate="header">
+              <tr>
+                <th>Invoice #</th>
+                <th>Patient</th>
+                <th>Net Amount</th>
+                <th>Payment Status</th>
+                <th>Method</th>
+                <th>Billing Date</th>
+                <th>Actions</th>
+              </tr>
+            </ng-template>
+            <ng-template pTemplate="body" let-bill>
+              <tr>
+                <td><span class="invoice-no">{{ bill.invoiceNumber }}</span></td>
+                <td>{{ bill.patientName }}</td>
+                <td class="amount">INR {{ bill.netAmount | number:'1.2-2' }}</td>
+                <td>
+                  <span class="status-badge" [ngClass]="getStatusClass(bill.paymentStatus)">
+                    {{ bill.paymentStatus }}
+                  </span>
+                </td>
+                <td>{{ bill.paymentMethod || '-' }}</td>
+                <td>{{ bill.billingDate | date:'MMM d, yyyy' }}</td>
+                <td>
+                  <div class="action-buttons">
+                    <button class="btn-icon btn-view" title="View Details" (click)="onView(bill)">
+                      <i class="ri-eye-line"></i>
+                    </button>
+                    <button class="btn-icon btn-start" title="Download PDF" (click)="onExportPdf(bill)" [disabled]="exportingId === bill.id">
+                      <i class="ri-file-pdf-line" *ngIf="exportingId !== bill.id"></i>
+                      <i class="ri-loader-4-line spin" *ngIf="exportingId === bill.id"></i>
+                    </button>
+                    <button class="btn-icon btn-checkin" title="Mark as Paid"
+                      *ngIf="bill.paymentStatus !== PaymentStatus.PAID && (userRole === 'ADMIN' || userRole === 'RECEPTIONIST')"
+                      (click)="onUpdateStatus(bill.id, PaymentStatus.PAID)">
+                      <i class="ri-checkbox-circle-line"></i>
+                    </button>
+                    <button class="btn-icon btn-delete" title="Delete" (click)="onDelete(bill.id)" *ngIf="userRole === 'ADMIN'">
+                      <i class="ri-delete-bin-line"></i>
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            </ng-template>
+          </p-table>
+        </div>
+
+        <div class="loading-state" *ngIf="isLoading">
+          <i class="ri-loader-4-line spin"></i>
+          <p>Loading invoices...</p>
+        </div>
+
+        <div class="empty-state" *ngIf="!isLoading && billings.length === 0">
+          <i class="ri-bill-line"></i>
+          <h3>No invoices found</h3>
+          <p>Create the first invoice for a patient.</p>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<div class="modal-overlay" *ngIf="showViewModal" (click)="closeViewModal()">
+  <div class="receipt-container" (click)="$event.stopPropagation()">
+    <div class="receipt-header">
+      <div class="hospital-branding">
+        <div class="logo-circle"><i class="ri-hospital-line"></i></div>
+        <div class="brand-copy">
+          <h2>Artemis Health System</h2>
+          <p>Medical Center Excellence</p>
+        </div>
+      </div>
+      <div class="invoice-meta">
+        <span class="invoice-label">INVOICE</span>
+        <h3 class="invoice-number">#{{ selectedBilling?.invoiceNumber }}</h3>
+        <p class="invoice-date">Date: {{ selectedBilling?.billingDate | date:'dd MMM yyyy' }}</p>
+      </div>
+    </div>
+
+    <div class="receipt-body">
+      <div class="patient-section">
+        <div class="info-group">
+          <small>Patient Name</small>
+          <strong>{{ selectedBilling?.patientName }}</strong>
+        </div>
+        <div class="info-group text-right">
+          <small>Payment Status</small>
+          <span class="receipt-status" [ngClass]="getStatusClass(selectedBilling?.paymentStatus!)">
+            {{ selectedBilling?.paymentStatus }}
+          </span>
+        </div>
+      </div>
+
+      <div class="bill-items-table">
+        <div class="table-header">
+          <span class="col-desc">Description</span>
+          <span class="col-qty">Qty</span>
+          <span class="col-price">Unit Price</span>
+          <span class="col-total">Total</span>
+        </div>
+        <div class="table-body">
+          <div class="table-row" *ngFor="let item of selectedBilling?.items">
+            <span class="col-desc">{{ item.itemName }}</span>
+            <span class="col-qty">{{ item.quantity }}</span>
+            <span class="col-price">₹{{ item.unitPrice | number:'1.2-2' }}</span>
+            <span class="col-total">₹{{ item.totalValue | number:'1.2-2' }}</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="receipt-summary">
+        <div class="summary-row">
+          <span>Subtotal</span>
+          <span>₹{{ selectedBilling?.totalAmount | number:'1.2-2' }}</span>
+        </div>
+        <div class="summary-row" *ngIf="selectedBilling?.taxAmount">
+          <span>Taxes (GST 5%)</span>
+          <span>₹{{ selectedBilling?.taxAmount | number:'1.2-2' }}</span>
+        </div>
+        <div class="summary-row" *ngIf="selectedBilling?.discountAmount">
+          <span>Discount Applied</span>
+          <span class="discount-val">-₹{{ selectedBilling?.discountAmount | number:'1.2-2' }}</span>
+        </div>
+        <div class="summary-row net-total">
+          <span>Total Payable</span>
+          <span>₹{{ selectedBilling?.netAmount | number:'1.2-2' }}</span>
+        </div>
+      </div>
+
+      <div class="payment-info" *ngIf="selectedBilling?.paymentMethod">
+        <p>Payment Method: <strong>{{ selectedBilling?.paymentMethod }}</strong></p>
+      </div>
+
+      <div class="receipt-footer">
+        <p>Thank you for choosing Artemis Health System.</p>
+        <small>This is a computer-generated invoice and doesn't require a physical signature.</small>
+      </div>
+    </div>
+
+    <div class="receipt-actions">
+      <button class="btn-outline" (click)="closeViewModal()">Close</button>
+      <button class="btn-primary" (click)="onExportPdf(selectedBilling!)">
+        <i class="ri-printer-line"></i> Download PDF
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Auto-Generate Modal -->
+<div class="modal-overlay" *ngIf="showAutoGenerateModal" (click)="showAutoGenerateModal = false">
+  <div class="modal-content small-modal" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <div class="header-icon-wrapper">
+        <i class="ri-flashlight-line"></i>
+      </div>
+      <div class="header-text">
+        <h3>Auto-Generate Bill</h3>
+        <p>Instant invoice calculation</p>
+      </div>
+      <button class="icon-btn close-modal-btn" (click)="showAutoGenerateModal = false">
+        <i class="ri-close-line"></i>
+      </button>
+    </div>
+
+    <div class="modal-body step-modal-body">
+      <div class="steps-info-banner">
+        <i class="ri-information-line"></i>
+        <span>This will auto-calculate fees for consultation, lab tests, and medicines.</span>
+      </div>
+      
+      <div class="billing-step" [class.active-step]="true">
+        <div class="step-indicator">
+          <span class="step-num">1</span>
+          <span class="step-label">Select Patient</span>
+        </div>
+        <div class="step-content">
+          <p-dropdown 
+            [options]="patientOptions()" 
+            [(ngModel)]="selectedPatientIdForAuto" 
+            (onChange)="onPatientSelectedForAuto($event.value)"
+            placeholder="Search patient record..." 
+            styleClass="w-full modern-dropdown"
+            [filter]="true"
+            filterBy="label"
+            appendTo="body">
+          </p-dropdown>
+        </div>
+      </div>
+
+      <div class="billing-step" [class.active-step]="selectedPatientIdForAuto" [class.locked-step]="!selectedPatientIdForAuto">
+        <div class="step-indicator">
+          <span class="step-num">2</span>
+          <span class="step-label">Select Appointment</span>
+          <i class="ri-lock-line lock-icon" *ngIf="!selectedPatientIdForAuto"></i>
+        </div>
+        <div class="step-content">
+          <p-dropdown 
+            *ngIf="selectedPatientIdForAuto"
+            [options]="patientAppointments" 
+            [(ngModel)]="selectedAppointmentId" 
+            optionValue="id"
+            placeholder="Choose billable encounter..." 
+            styleClass="w-full modern-dropdown"
+            appendTo="body">
+              <ng-template let-item pTemplate="item">
+                <div class="appointment-option-modern">
+                  <div class="appt-main">
+                    <i class="ri-calendar-event-line"></i>
+                    <strong>{{ item.appointmentTime | date:'dd MMM yyyy, HH:mm' }}</strong>
+                  </div>
+                  <div class="appt-meta">
+                    <span class="dept-tag">{{ item.department }}</span>
+                    <span class="status-dot" [ngClass]="getStatusClass(item.status)">{{ item.status }}</span>
+                  </div>
+                </div>
+              </ng-template>
+          </p-dropdown>
+          <div class="no-appt-fallback" *ngIf="selectedPatientIdForAuto && patientAppointments.length === 0">
+            <i class="ri-error-warning-line"></i>
+            No completed appointments found for this patient.
+          </div>
+          <div class="lock-placeholder" *ngIf="!selectedPatientIdForAuto">
+            Complete Step 1 to see available appointments
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal-footer footer-gradient">
+      <button class="btn-ghost" (click)="showAutoGenerateModal = false">Discard</button>
+      <button class="btn-primary-gradient" 
+              [disabled]="!selectedAppointmentId || isGenerating" 
+              (click)="generateFromAppointment()">
+        <i class="ri-loader-4-line spin" *ngIf="isGenerating"></i>
+        <span>{{ isGenerating ? 'Generating...' : 'Calculate & Generate Bill' }}</span>
+        <i class="ri-arrow-right-line" *ngIf="!isGenerating"></i>
+      </button>
+    </div>
+  </div>
+</div>

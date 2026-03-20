@@ -1,0 +1,179 @@
+<div class="dashboard-layout">
+  <app-sidebar></app-sidebar>
+  
+  <main class="main-content">
+    <app-header></app-header>
+
+    <div class="page-body">
+      <div class="content-header">
+        <div class="title-section">
+          <h1>{{ isViewMode ? 'Doctor Profile' : isEditMode ? 'Edit Doctor' : 'Registration: Medical Staff' }}</h1>
+          <p>{{ isViewMode ? 'Review the doctor profile and assigned clinical details' : isEditMode ? 'Update the doctor profile and department assignment' : 'Add a new doctor or specialist to the hospital directory' }}</p>
+        </div>
+        <div class="header-actions">
+          <button class="btn-outline" routerLink="/staff">
+            <i class="ri-arrow-left-line"></i> Back to Staff List
+          </button>
+        </div>
+      </div>
+
+      <div class="registration-form-card">
+        <form [formGroup]="doctorForm" (ngSubmit)="onSubmit()">
+          <div class="form-shell">
+            <section class="form-section section-wide">
+              <div class="section-title">
+                <div class="section-icon"><i class="ri-shield-user-line"></i></div>
+                <div>
+                  <h3>Account Access</h3>
+                  <p>These credentials will be used for first-time sign-in.</p>
+                </div>
+              </div>
+
+              <div class="form-grid two-column">
+                <div class="form-group">
+                  <label class="form-label">Login Username</label>
+                  <input pInputText type="text" formControlName="username" class="form-control" placeholder="dr.sharma" [readonly]="isEditMode || isViewMode">
+                  <div class="error-msg" *ngIf="doctorForm.get('username')?.touched && doctorForm.get('username')?.invalid">
+                    <small *ngIf="doctorForm.get('username')?.errors?.['required']">Username is required</small>
+                    <small *ngIf="doctorForm.get('username')?.errors?.['minlength']">Username must be at least 3 characters</small>
+                    <small *ngIf="doctorForm.get('username')?.errors?.['pattern']">Use letters, numbers, dot, underscore, or hyphen only</small>
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Temporary Password</label>
+                  <input pInputText type="text" formControlName="temporaryPassword" class="form-control" placeholder="Welcome@123" [readonly]="isEditMode || isViewMode">
+                  <div class="error-msg" *ngIf="doctorForm.get('temporaryPassword')?.touched && doctorForm.get('temporaryPassword')?.invalid">
+                    <small *ngIf="doctorForm.get('temporaryPassword')?.errors?.['required']">Temporary password is required</small>
+                    <small *ngIf="doctorForm.get('temporaryPassword')?.errors?.['minlength']">Temporary password must be at least 8 characters</small>
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            <div class="section-grid">
+              <section class="form-section">
+                <div class="section-title">
+                  <div class="section-icon"><i class="ri-user-settings-line"></i></div>
+                  <div>
+                    <h3>Personal Profile</h3>
+                    <p>Basic doctor identity and communication details.</p>
+                  </div>
+                </div>
+
+                <div class="form-grid two-column">
+                  <div class="form-group">
+                    <label class="form-label">First Name</label>
+                    <input pInputText type="text" formControlName="firstName" class="form-control" placeholder="First Name">
+                    <div class="error-msg" *ngIf="doctorForm.get('firstName')?.touched && doctorForm.get('firstName')?.invalid">
+                      <small>Valid first name is required</small>
+                    </div>
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label">Last Name</label>
+                    <input pInputText type="text" formControlName="lastName" class="form-control" placeholder="Last Name">
+                    <div class="error-msg" *ngIf="doctorForm.get('lastName')?.touched && doctorForm.get('lastName')?.invalid">
+                      <small>Valid last name is required</small>
+                    </div>
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label">Email</label>
+                    <input pInputText type="email" formControlName="email" class="form-control" placeholder="doctor@hms.com">
+                    <div class="error-msg" *ngIf="doctorForm.get('email')?.touched && doctorForm.get('email')?.invalid">
+                      <small>Valid email is required</small>
+                    </div>
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label">Phone Number</label>
+                    <input pInputText type="text" formControlName="phoneNumber" class="form-control" placeholder="+91 9876543210">
+                    <div class="error-msg" *ngIf="doctorForm.get('phoneNumber')?.touched && doctorForm.get('phoneNumber')?.invalid">
+                      <small>Valid phone number is required</small>
+                    </div>
+                  </div>
+                  <div class="form-group full-width">
+                    <label class="form-label">Professional Bio</label>
+                    <textarea pInputTextarea formControlName="bio" class="form-control" rows="4" placeholder="Profile summary, special interests, OPD timings"></textarea>
+                  </div>
+                </div>
+              </section>
+
+              <section class="form-section">
+                <div class="section-title">
+                  <div class="section-icon"><i class="ri-stethoscope-line"></i></div>
+                  <div>
+                    <h3>Clinical Setup</h3>
+                    <p>Assign the doctor to the right department and practice area.</p>
+                  </div>
+                </div>
+
+                <div class="form-grid two-column">
+                  <div class="form-group">
+                    <label class="form-label">Specialization</label>
+                    <input pInputText type="text" formControlName="specialization" class="form-control" placeholder="E.g. Cardiology">
+                    <div class="error-msg" *ngIf="doctorForm.get('specialization')?.touched && doctorForm.get('specialization')?.invalid">
+                      <small>Specialization is required</small>
+                    </div>
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label">Department</label>
+                    <p-dropdown
+                      formControlName="department"
+                      [options]="departmentOptions()"
+                      optionLabel="label"
+                      optionValue="value"
+                      placeholder="Select OPD Department..."
+                      styleClass="w-full"
+                    ></p-dropdown>
+                    <div class="error-msg" *ngIf="doctorForm.get('department')?.touched && doctorForm.get('department')?.invalid">
+                      <small>Department is required</small>
+                    </div>
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label">Medical License No.</label>
+                    <input pInputText type="text" formControlName="licenseNumber" class="form-control" placeholder="MED-12345">
+                    <div class="error-msg" *ngIf="doctorForm.get('licenseNumber')?.touched && doctorForm.get('licenseNumber')?.invalid">
+                      <small>Valid license number is required</small>
+                    </div>
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label">Qualification</label>
+                    <input pInputText type="text" formControlName="qualification" class="form-control" placeholder="MD, MBBS, DM">
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label">Designation</label>
+                    <input pInputText type="text" formControlName="designation" class="form-control" placeholder="Consultant Physician">
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label">Experience (Years)</label>
+                    <p-inputNumber formControlName="experienceYears" [useGrouping]="false" [min]="0" [max]="100" placeholder="0"></p-inputNumber>
+                  </div>
+                  <div class="form-group full-width accent-field">
+                    <label class="form-label">Consultation Fee ($)</label>
+                    <p-inputNumber formControlName="consultationFee" mode="decimal" [min]="0" [minFractionDigits]="2" [maxFractionDigits]="2" placeholder="0.00"></p-inputNumber>
+                    <div class="error-msg" *ngIf="doctorForm.get('consultationFee')?.touched && doctorForm.get('consultationFee')?.invalid">
+                      <small>Consultation fee is required</small>
+                    </div>
+                  </div>
+                </div>
+              </section>
+            </div>
+          </div>
+
+          <div class="success-alert" *ngIf="successMessage">
+            <i class="ri-checkbox-circle-line"></i> {{ successMessage }}
+          </div>
+
+          <div class="error-alert" *ngIf="errorMessage">
+            <i class="ri-error-warning-line"></i> {{ errorMessage }}
+          </div>
+
+          <div class="form-actions">
+            <button type="button" class="btn-outline" routerLink="/staff">Cancel</button>
+            <button *ngIf="!isViewMode" type="submit" class="btn-primary" [disabled]="isLoading">
+              {{ isLoading ? 'Saving...' : (isEditMode ? 'Save Changes' : 'Add Doctor') }}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </main>
+</div>

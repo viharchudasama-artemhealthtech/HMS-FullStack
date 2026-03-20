@@ -1,0 +1,109 @@
+<div class="dashboard-layout">
+  <app-sidebar></app-sidebar>
+
+  <div class="main-content">
+    <app-header></app-header>
+
+    <main class="page-body">
+      <div class="page-header">
+        <div class="back-link">
+          <a routerLink="/appointments"><i class="ri-arrow-left-line"></i> Back to Appointments</a>
+        </div>
+        <h1>Record Vitals</h1>
+        <p>Enter patient vitals for appointment #{{ appointmentId | slice:0:8 }}</p>
+      </div>
+
+      <div class="card form-container">
+        <form [formGroup]="vitalsForm" (ngSubmit)="onSubmit()">
+          <div class="form-shell">
+          <div class="section section-wide">
+            <div class="section-title">
+              <div class="section-icon"><i class="ri-heart-pulse-line"></i></div>
+              <div class="section-copy">
+                <h3>Vital Measurements</h3>
+                <p>Record the patient’s current vitals for triage and doctor review.</p>
+              </div>
+            </div>
+          <div class="form-grid two-column">
+            <div class="form-group">
+              <label>Temperature (C)</label>
+              <p-inputNumber formControlName="temperature" mode="decimal" [min]="30" [max]="45" [minFractionDigits]="1" [maxFractionDigits]="1" placeholder="37.0"></p-inputNumber>
+              <div class="error-msg" *ngIf="vitalsForm.get('temperature')?.invalid && vitalsForm.get('temperature')?.touched">
+                Enter valid temperature (30-45)
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label>Pulse Rate (bpm)</label>
+              <p-inputNumber formControlName="pulseRate" [useGrouping]="false" [min]="30" [max]="250" placeholder="72"></p-inputNumber>
+              <div class="error-msg" *ngIf="vitalsForm.get('pulseRate')?.invalid && vitalsForm.get('pulseRate')?.touched">
+                Enter valid pulse rate (30-250)
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label>Blood Pressure (mmHg)</label>
+              <div class="bp-inputs">
+                <p-inputNumber formControlName="systolicBP" [useGrouping]="false" [min]="50" [max]="250" placeholder="120"></p-inputNumber>
+                <span>/</span>
+                <p-inputNumber formControlName="diastolicBP" [useGrouping]="false" [min]="30" [max]="150" placeholder="80"></p-inputNumber>
+              </div>
+              <div class="error-msg" *ngIf="(vitalsForm.get('systolicBP')?.invalid || vitalsForm.get('diastolicBP')?.invalid) && (vitalsForm.get('systolicBP')?.touched || vitalsForm.get('diastolicBP')?.touched)">
+                Enter valid BP values
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label>SpO2 (%)</label>
+              <p-inputNumber formControlName="spo2" [useGrouping]="false" [min]="50" [max]="100" placeholder="98"></p-inputNumber>
+            </div>
+
+            <div class="form-group">
+              <label>Resp. Rate (bpm)</label>
+              <p-inputNumber formControlName="respiratoryRate" [useGrouping]="false" [min]="5" [max]="60" placeholder="16"></p-inputNumber>
+            </div>
+
+            <div class="form-group">
+              <label>Weight (kg)</label>
+              <p-inputNumber formControlName="weight" mode="decimal" [min]="0" [max]="500" [minFractionDigits]="1" [maxFractionDigits]="1" placeholder="70"></p-inputNumber>
+            </div>
+
+            <div class="form-group">
+              <label>Height (cm)</label>
+              <p-inputNumber formControlName="height" [useGrouping]="false" [min]="0" [max]="300" placeholder="175"></p-inputNumber>
+            </div>
+          </div>
+          </div>
+
+          <div class="section">
+          <div class="section-title">
+            <div class="section-icon"><i class="ri-file-text-line"></i></div>
+            <div class="section-copy">
+              <h3>Clinical Notes</h3>
+              <p>Add observations that will help the care team interpret the vitals.</p>
+            </div>
+          </div>
+          <div class="form-group full-width">
+            <label>Notes / Observations</label>
+            <textarea pInputTextarea formControlName="notes" rows="3" placeholder="Any specific observations..."></textarea>
+          </div>
+          </div>
+
+          <div class="form-actions">
+            <button type="button" class="btn-secondary" routerLink="/appointments">Cancel</button>
+            <button type="submit" class="btn-primary" [disabled]="vitalsForm.invalid || isSubmitting">
+              <i class="ri-save-line" *ngIf="!isSubmitting"></i>
+              <span class="spinner" *ngIf="isSubmitting"></span>
+              {{ isSubmitting ? 'Saving...' : 'Record Vitals' }}
+            </button>
+          </div>
+
+          <div class="alert alert-danger" *ngIf="error">
+            {{ error }}
+          </div>
+          </div>
+        </form>
+      </div>
+    </main>
+  </div>
+</div>

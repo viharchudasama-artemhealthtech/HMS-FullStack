@@ -1,0 +1,161 @@
+<div class="dashboard-layout">
+  <app-sidebar></app-sidebar>
+  
+  <main class="main-content">
+    <app-header></app-header>
+
+    <div class="page-body">
+      <div class="content-header">
+        <div class="title-section">
+          <h1>Appointments Schedule</h1>
+          <p>{{ pageLead }}</p>
+        </div>
+        <div class="header-actions">
+          <button class="btn-excel" (click)="exportToExcel()" *ngIf="appointments.length > 0">
+            <i class="ri-file-excel-2-line"></i> Download Excel
+          </button>
+          <button class="btn-primary" routerLink="/appointments/book" *ngIf="userRole !== 'DOCTOR'">
+            <i class="ri-calendar-todo-line"></i> Book Appointment
+          </button>
+        </div>
+      </div>
+
+      <div class="queue-grid">
+        <button type="button" class="queue-card" [class.active]="selectedStatusFilter === 'ALL'" (click)="setStatusFilter('ALL')">
+          <span class="queue-label">All Visits</span>
+          <strong>{{ appointments.length }}</strong>
+          <small>Full appointment board</small>
+        </button>
+        <button type="button" class="queue-card" [class.active]="selectedStatusFilter === statusEnum.SCHEDULED" (click)="setStatusFilter(statusEnum.SCHEDULED)">
+          <span class="queue-label">Reception Queue</span>
+          <strong>{{ scheduledCount }}</strong>
+          <small>Scheduled and waiting</small>
+        </button>
+        <button type="button" class="queue-card" [class.active]="selectedStatusFilter === statusEnum.CHECKED_IN" (click)="setStatusFilter(statusEnum.CHECKED_IN)">
+          <span class="queue-label">Doctor Queue</span>
+          <strong>{{ checkedInCount }}</strong>
+          <small>Checked in and ready</small>
+        </button>
+        <button type="button" class="queue-card" [class.active]="selectedStatusFilter === statusEnum.IN_CONSULTATION" (click)="setStatusFilter(statusEnum.IN_CONSULTATION)">
+          <span class="queue-label">In Consultation</span>
+          <strong>{{ inConsultationCount }}</strong>
+          <small>Active treatment now</small>
+        </button>
+      </div>
+
+      <div class="appointments-card">
+        <div class="workflow-banner" *ngIf="userRole === 'DOCTOR'">
+          <div class="workflow-copy">
+            <strong>Doctor workflow</strong>
+            <span>`SCHEDULED` -> reception checks in patient -> `CHECKED_IN` -> you start consultation -> prescribe -> complete visit.</span>
+          </div>
+        </div>
+        <div class="workflow-banner receptionist" *ngIf="userRole === 'RECEPTIONIST' || userRole === 'ADMIN'">
+          <div class="workflow-copy">
+            <strong>Front desk workflow</strong>
+            <span>Use `Check In` when the patient arrives. That moves the visit into the doctor queue and unlocks consultation for the assigned doctor.</span>
+          </div>
+          <button type="button" class="btn-outline reception-shortcut" (click)="setStatusFilter(statusEnum.SCHEDULED)">
+            <i class="ri-user-received-line"></i>
+            Open Reception Queue
+          </button>
+        </div>
+        <div class="table-responsive" *ngIf="!isLoading">
+          <p-table [value]="filteredAppointments" responsiveLayout="scroll" styleClass="data-table">
+            <ng-template pTemplate="header">
+              <tr>
+                <th>Patient</th>
+                <th>Department / Doctor</th>
+                <th>Time</th>
+                <th>Status</th>
+                <th>Token</th>
+                <th>Actions</th>
+              </tr>
+            </ng-template>
+            <ng-template pTemplate="body" let-apt>
+              <tr>
+                <td>
+                  <div class="user-info">
+                    <div class="avatar-small">{{ apt.patientName[0] }}</div>
+                    <span>{{ apt.patientName }}</span>
+                  </div>
+                </td>
+                <td>
+                  <div class="dept-info">
+                    <span class="dept-label">{{ apt.department.replace('_', ' ') | titlecase }}</span>
+                    <div class="doctor-subtext" *ngIf="apt.doctorName">Dr. {{ apt.doctorName }}</div>
+                    <div class="doctor-subtext unassigned" *ngIf="!apt.doctorName">Unassigned</div>
+                  </div>
+                </td>
+                <td>
+                  <div class="time-box">
+                    <strong>{{ apt.appointmentTime | date:'shortTime' }}</strong>
+                    <small>{{ apt.appointmentTime | date:'MMM d' }}</small>
+                  </div>
+                </td>
+                <td>
+                  <span class="status-badge" [ngClass]="getStatusClass(apt.status)">
+                    {{ apt.status }}
+                  </span>
+                  <div class="workflow-note">{{ getWorkflowLabel(apt) }}</div>
+                </td>
+                <td>
+                  <span class="token-number" [class.emergency]="apt.isEmergency" *ngIf="apt.tokenNumber">{{ apt.tokenNumber }}</span>
+                  <span class="text-muted" *ngIf="!apt.tokenNumber">--</span>
+                  <div class="emergency-badge" *ngIf="apt.isEmergency">EMERGENCY</div>
+                </td>
+                <td>
+                  <div class="action-buttons">
+                    <button *ngIf="apt.status === statusEnum.SCHEDULED && (userRole === 'ADMIN' || userRole === 'RECEPTIONIST')" class="btn-icon btn-checkin" title="Check In Patient" (click)="onCheckIn(apt.id)">
+                      <i class="ri-user-received-line"></i>
+                    </button>
+                    <button *ngIf="apt.status === statusEnum.CHECKED_IN && (userRole === 'ADMIN' || userRole === 'RECEPTIONIST' || userRole === 'NURSE')" class="btn-icon btn-start" title="Record Vitals" [routerLink]="['/clinical/vitals', apt.id]">
+                      <i class="ri-pulse-line"></i>
+                    </button>
+                    <button *ngIf="apt.status === statusEnum.CHECKED_IN && (userRole === 'ADMIN' || userRole === 'RECEPTIONIST' || userRole === 'DOCTOR')" class="btn-icon btn-play" title="Start Consultation" (click)="onStart(apt.id)">
+                      <i class="ri-play-line"></i>
+                    </button>
+                    <span class="action-hint" *ngIf="userRole === 'DOCTOR' && apt.status === statusEnum.SCHEDULED">
+                      Waiting for check-in
+                    </span>
+                    <span class="action-hint ready" *ngIf="userRole === 'DOCTOR' && apt.status === statusEnum.CHECKED_IN">
+                      Start from this row
+                    </span>
+                    <button *ngIf="apt.status === statusEnum.IN_CONSULTATION && (userRole === 'ADMIN' || userRole === 'DOCTOR')" class="btn-icon btn-start" title="New Prescription" [routerLink]="['/prescriptions/create', apt.id]">
+                      <i class="ri-capsule-line"></i>
+                    </button>
+                    <button *ngIf="apt.status === statusEnum.IN_CONSULTATION && (userRole === 'ADMIN' || userRole === 'DOCTOR')" class="btn-icon btn-complete" title="Complete Consultation" (click)="onComplete(apt.id)">
+                      <i class="ri-checkbox-circle-line"></i>
+                    </button>
+                    <button *ngIf="apt.status === statusEnum.COMPLETED && (userRole === 'ADMIN' || userRole === 'RECEPTIONIST')" class="btn-icon btn-view" title="Generate Bill" (click)="onGenerateBill(apt.id)">
+                      <i class="ri-bill-line"></i>
+                    </button>
+                    <button *ngIf="canManageAppointment() && apt.status !== statusEnum.COMPLETED && apt.status !== statusEnum.CANCELLED" class="btn-icon btn-edit" title="Edit Appointment" (click)="onEdit(apt.id)">
+                      <i class="ri-edit-line"></i>
+                    </button>
+                    <button *ngIf="canManageAppointment()" class="btn-icon btn-delete" title="Delete Appointment" (click)="onDelete(apt.id)">
+                      <i class="ri-delete-bin-line"></i>
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            </ng-template>
+          </p-table>
+        </div>
+
+        <!-- Loading State -->
+        <div class="loading-state" *ngIf="isLoading">
+          <i class="ri-loader-4-line spin"></i>
+          <p>Updating schedule...</p>
+        </div>
+
+        <!-- Empty State -->
+        <div class="empty-state" *ngIf="!isLoading && filteredAppointments.length === 0">
+          <i class="ri-calendar-event-line"></i>
+          <h3>No appointments in this queue</h3>
+          <p>Choose another queue filter or book a new appointment.</p>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>

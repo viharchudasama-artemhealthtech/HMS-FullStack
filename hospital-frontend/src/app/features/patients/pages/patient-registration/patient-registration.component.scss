@@ -1,0 +1,123 @@
+.page-content {
+  padding: 2rem;
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.content-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 2rem;
+
+  h1 { font-size: 2rem; }
+  p { color: var(--text-muted); }
+}
+
+.registration-form-card {
+  background: white;
+  padding: 2.5rem;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+  border: 1px solid var(--border-color);
+}
+
+.form-section {
+  margin-bottom: 3rem;
+
+  .section-title {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 1.5rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 2px solid #f3f4f6;
+
+    i {
+      font-size: 1.5rem;
+      color: var(--brand-primary);
+    }
+    h3 {
+      font-size: 1.1rem;
+      color: var(--text-main);
+      margin: 0;
+    }
+  }
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1.5rem;
+
+  .full-width {
+    grid-column: span 2;
+  }
+}
+
+.input-wrapper {
+  position: relative;
+  i.icon {
+    position: absolute;
+    left: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-muted);
+  }
+  .form-control {
+    padding-left: 2.75rem !important;
+  }
+}
+
+.form-group {
+  .form-control {
+    background-color: #f9fafb;
+    border: 1px solid #e5e7eb;
+    &:focus {
+      background-color: white;
+      border-color: var(--brand-primary);
+    }
+  }
+}
+
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+  margin-top: 2rem;
+  padding-top: 2rem;
+  border-top: 1px solid #f3f4f6;
+
+  .btn-outline {
+    padding: 0.75rem 2rem;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    font-weight: 600;
+    color: var(--text-muted);
+    &:hover { background-color: #f9fafb; color: var(--text-main); }
+  }
+
+  .btn-primary {
+    padding: 0.75rem 2.5rem;
+  }
+}
+
+.error-alert {
+  background-color: #fef2f2;
+  color: #991b1b;
+  padding: 1rem;
+  border-radius: var(--radius-md);
+  margin: 1.5rem 0;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-size: 0.9rem;
+  border: 1px solid #fee2e2;
+}
+
+@media (max-width: 600px) {
+  .form-grid {
+    grid-template-columns: 1fr;
+    .full-width { grid-column: span 1; }
+  }
+}

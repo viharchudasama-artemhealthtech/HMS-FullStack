@@ -1,0 +1,66 @@
+<div class="dashboard-layout">
+  <app-sidebar></app-sidebar>
+  
+  <main class="main-content">
+    <app-header></app-header>
+
+    <div class="page-body">
+      <div class="content-header">
+        <div class="title-section">
+          <h1>Medical Staff</h1>
+          <p>Manage hospital doctors and specialists</p>
+        </div>
+        <div class="header-actions">
+          <button class="btn-primary" routerLink="/staff/register">
+            <i class="ri-user-add-line"></i> Add New Doctor
+          </button>
+        </div>
+      </div>
+
+      <div class="doctors-grid" *ngIf="!isLoading">
+        <div class="doctor-card" *ngFor="let doctor of doctors">
+          <div class="card-top">
+            <div class="avatar-large">{{ doctor.firstName[0] }}{{ doctor.lastName[0] }}</div>
+            <div class="availability-dot" [class.available]="doctor.isAvailable"></div>
+          </div>
+          
+          <div class="card-info">
+            <h3>Dr. {{ doctor.firstName }} {{ doctor.lastName }}</h3>
+            <span class="specialization">{{ doctor.specialization }}</span>
+            <span class="department">Department: {{ doctor.department }}</span>
+          </div>
+
+          <div class="card-footer">
+            <div class="stat">
+              <i class="ri-money-dollar-circle-line"></i>
+              <span>${{ doctor.consultationFee }}</span>
+            </div>
+            <div class="stat">
+              <i class="ri-hospital-line"></i>
+              <span>{{ doctor.registrationNumber }}</span>
+            </div>
+          </div>
+
+          <div class="card-actions">
+            <button class="btn-outline-sm" (click)="onEdit(doctor)">Edit</button>
+            <button class="btn-primary-sm" [routerLink]="['/staff/schedule', doctor.id]">Schedule</button>
+            <button class="btn-delete-sm" (click)="onDelete(doctor)">Delete</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Loading State -->
+      <div class="loading-full" *ngIf="isLoading">
+        <i class="ri-loader-4-line spin"></i>
+        <p>Fetching staff directory...</p>
+      </div>
+
+      <!-- Empty State -->
+      <div class="empty-state" *ngIf="!isLoading && doctors.length === 0">
+        <i class="ri-team-line"></i>
+        <h3>No doctors found</h3>
+        <p>Try adding a new doctor to the system.</p>
+      </div>
+    </div>
+  </main>
+</div>

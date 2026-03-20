@@ -1,0 +1,261 @@
+<div class="dashboard-layout">
+  <app-sidebar></app-sidebar>
+  
+  <main class="main-content">
+    <app-header></app-header>
+
+    <div class="page-body" *ngIf="!isLoading && patient">
+      <!-- Premium Content Header -->
+      <div class="content-header-banner">
+        <div class="header-content">
+          <div class="breadcrumb">
+            <a routerLink="/patients" class="breadcrumb-link"><i class="ri-search-2-line"></i> Patient Directory</a> / <span>{{ patient.name }}</span>
+          </div>
+          <div class="title-row">
+            <h1>Patient Profile <span class="badge-tag">Premium Care</span></h1>
+            <div class="actions">
+              <button class="btn-secondary" routerLink="/patients">
+                <i class="ri-arrow-left-line"></i> Back to Directory
+              </button>
+              <button class="btn-primary" [routerLink]="['/appointments/book']" [queryParams]="{patientId: patient.id}">
+                <i class="ri-calendar-event-line"></i> Schedule Appointment
+              </button>
+              <button class="btn-icon-outline" title="Edit Profile">
+                <i class="ri-settings-3-line"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="profile-layout">
+        <!-- Sidebar Navigation & Quick Info -->
+        <aside class="profile-sidebar">
+          <div class="card patient-identity">
+            <div class="avatar-block" [ngClass]="getUrgencyClass(patient.urgencyLevel)">
+              {{ patient.name | slice:0:1 }}
+            </div>
+            <div class="identity-info">
+              <h2>{{ patient.name }}</h2>
+              <p class="id">ID: <span>{{ patient.id | slice:0:8 | uppercase }}</span></p>
+              <div class="urgency-label" [ngClass]="getUrgencyClass(patient.urgencyLevel)">
+                <i class="ri-error-warning-fill"></i> {{ patient.urgencyLevel }} Priority
+              </div>
+            </div>
+            
+            <div class="quick-stats">
+              <div class="stat">
+                <span class="label">Age</span>
+                <span class="value">{{ patient.age }}</span>
+                <span class="sub">Years</span>
+              </div>
+              <div class="stat">
+                <span class="label">Blood</span>
+                <span class="value">{{ patient.bloodGroup.replace('_POSITIVE', '+').replace('_NEGATIVE', '-') }}</span>
+                <span class="sub">Group</span>
+              </div>
+            </div>
+
+            <div class="contact-details">
+              <a [href]="'tel:' + patient.contactNumber" class="contact-card">
+                <i class="ri-phone-fill"></i>
+                <div class="info">
+                  <span class="lbl">Primary Contact</span>
+                  <span class="val">{{ patient.contactNumber }}</span>
+                </div>
+              </a>
+              <div class="contact-card">
+                <i class="ri-time-fill"></i>
+                <div class="info">
+                  <span class="lbl">Member Since</span>
+                  <span class="val">{{ patient.createdAt | date:'MMM yyyy' }}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </aside>
+
+        <!-- Main Medical Workspace -->
+        <section class="profile-workspace">
+          <!-- Vitals Summary Grid -->
+          <div class="section-title-row">
+            <h3><i class="ri-heart-pulse-line"></i> Clinical Vital Sign History</h3>
+            <button class="btn-sm-primary" *ngIf="canManageVitals()" (click)="openVitalsDialog()">
+              <i class="ri-add-line"></i> Capture New Vitals
+            </button>
+          </div>
+
+          <div class="vitals-history-container">
+            <div class="vitals-scroll-list" *ngIf="!isLoadingVitals && vitalsHistory.length > 0">
+              <div class="vitals-entry-card" *ngFor="let entry of vitalsHistory">
+                <div class="entry-header">
+                  <div class="entry-meta">
+                    <span class="date">{{ entry.recordedAt | date:'mediumDate' }}</span>
+                    <span class="time">{{ entry.recordedAt | date:'shortTime' }}</span>
+                  </div>
+                  <div class="entry-actions" *ngIf="canManageVitals()">
+                    <button class="btn-icon-flat" (click)="openVitalsDialog(entry)" title="Edit">
+                      <i class="ri-edit-line"></i>
+                    </button>
+                    <button class="btn-icon-flat danger" (click)="deleteVitals(entry.id)" title="Delete">
+                      <i class="ri-delete-bin-line"></i>
+                    </button>
+                  </div>
+                </div>
+                
+                <div class="metrics-grid">
+                  <div class="metric" *ngIf="entry.temperature">
+                    <i class="ri-temp-hot-line"></i>
+                    <div>
+                      <span class="val">{{ entry.temperature }}°C</span>
+                      <span class="lbl">TEMP</span>
+                    </div>
+                  </div>
+                  <div class="metric" *ngIf="entry.systolicBP">
+                    <i class="ri-pulse-line"></i>
+                    <div>
+                      <span class="val">{{ entry.systolicBP }}/{{ entry.diastolicBP }}</span>
+                      <span class="lbl">BP (mmHg)</span>
+                    </div>
+                  </div>
+                  <div class="metric highlight" *ngIf="entry.pulseRate">
+                    <i class="ri-heart-3-line"></i>
+                    <div>
+                      <span class="val">{{ entry.pulseRate }}</span>
+                      <span class="lbl">PULSE (bpm)</span>
+                    </div>
+                  </div>
+                  <div class="metric" *ngIf="entry.spo2">
+                    <i class="ri-windy-line"></i>
+                    <div>
+                      <span class="val">{{ entry.spo2 }}%</span>
+                      <span class="lbl">SPO2</span>
+                    </div>
+                  </div>
+                </div>
+                
+                <div class="entry-notes" *ngIf="entry.notes">
+                  <p><strong>Note:</strong> {{ entry.notes }}</p>
+                </div>
+              </div>
+            </div>
+
+            <div class="empty-vitals" *ngIf="!isLoadingVitals && vitalsHistory.length === 0">
+              <i class="ri-folder-history-line"></i>
+              <p>No vital records found for this patient.</p>
+              <button class="btn-sm-outline" *ngIf="canManageVitals()" (click)="openVitalsDialog()">Record Initial Vitals</button>
+            </div>
+            
+            <div class="vitals-loading" *ngIf="isLoadingVitals">
+              <span class="spinner"></span>
+              <p>Syncing clinical history...</p>
+            </div>
+          </div>
+
+          <!-- Existing Clinical Cards -->
+          <div class="medical-summary-cards">
+            <div class="card medical-info">
+              <div class="card-header">
+                <h3><i class="ri-microscope-line"></i> Primary Diagnosis</h3>
+              </div>
+              <div class="card-content">
+                <p class="diagnosis-text">{{ patient.prescription || 'No active diagnosis recorded.' }}</p>
+                <div class="tag-row" *ngIf="patient.dose">
+                  <span class="dosage"><i class="ri-medicine-bottle-line"></i> Recommendation: {{ patient.dose }}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+      </div>
+    </div>
+
+    <!-- Management Modal: Record/Edit Vitals -->
+    <p-dialog 
+      [(visible)]="vitalsDialogVisible" 
+      [header]="editingVitalsId ? 'Update Vital Signs' : 'Record Vital Signs'" 
+      [modal]="true" 
+      [draggable]="false" 
+      [resizable]="false"
+      styleClass="clinical-modal"
+    >
+      <form [formGroup]="vitalsForm" (ngSubmit)="saveVitals()" class="vitals-form">
+        <div class="form-row" *ngIf="!editingVitalsId">
+          <div class="form-group full-width">
+            <label>Link to Active Appointment *</label>
+            <p-dropdown 
+              formControlName="appointmentId" 
+              [options]="appointments" 
+              optionLabel="appointmentTime" 
+              optionValue="id"
+              placeholder="Select an active appointment"
+              [style]="{'width':'100%'}"
+              appendTo="body"
+            >
+              <ng-template pTemplate="selectedItem" let-item>
+                <div *ngIf="item">
+                  <span style="font-weight: 700;">{{ item.appointmentTime | date:'medium' }}</span> 
+                  <span style="color: #64748b; font-size: 0.8rem; margin-left: 0.5rem;">({{ item.reason }})</span>
+                </div>
+              </ng-template>
+              <ng-template pTemplate="item" let-item>
+                <div>
+                  <div style="font-weight: 700; color: #1e293b;">{{ item.appointmentTime | date:'medium' }}</div>
+                  <div style="font-size: 0.8rem; color: #64748b;">{{ item.reason }}</div>
+                </div>
+              </ng-template>
+            </p-dropdown>
+            <div class="empty-hint" *ngIf="appointments.length === 0">
+              <i class="ri-error-warning-line"></i> No active appointments found for today.
+            </div>
+          </div>
+        </div>
+
+        <div class="form-grid-modal">
+          <div class="form-group">
+            <label>Temperature (°C)</label>
+            <input type="number" formControlName="temperature" step="0.1" placeholder="e.g. 37.0">
+          </div>
+          <div class="form-group">
+            <label>Systolic BP</label>
+            <input type="number" formControlName="systolicBP" placeholder="e.g. 120">
+          </div>
+          <div class="form-group">
+            <label>Diastolic BP</label>
+            <input type="number" formControlName="diastolicBP" placeholder="e.g. 80">
+          </div>
+          <div class="form-group">
+            <label>Pulse Rate (BPM)</label>
+            <input type="number" formControlName="pulseRate" placeholder="e.g. 72">
+          </div>
+          <div class="form-group">
+            <label>SPO2 (%)</label>
+            <input type="number" formControlName="spo2" placeholder="e.g. 98">
+          </div>
+          <div class="form-group">
+            <label>Weight (kg)</label>
+            <input type="number" formControlName="weight" step="0.1" placeholder="e.g. 70">
+          </div>
+        </div>
+
+        <div class="form-group full-width">
+          <label>Clinical Notes</label>
+          <textarea formControlName="notes" rows="3" placeholder="Add any specific observations..."></textarea>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn-secondary" (click)="vitalsDialogVisible = false">Cancel</button>
+          <button type="submit" class="btn-primary" [disabled]="vitalsForm.invalid || isSavingVitals">
+            <span class="spinner-sm" [class.show]="isSavingVitals"></span>
+            {{ editingVitalsId ? 'Update Record' : 'Save Record' }}
+          </button>
+        </div>
+      </form>
+    </p-dialog>
+
+    <div class="loading-full-screen" *ngIf="isLoading">
+      <div class="pulse-loader"></div>
+      <p>Consulting Medical Records...</p>
+    </div>
+  </main>
+</div>

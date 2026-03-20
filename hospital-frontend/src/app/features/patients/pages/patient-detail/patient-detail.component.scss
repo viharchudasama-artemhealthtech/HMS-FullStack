@@ -1,0 +1,318 @@
+.page-body {
+  padding: 2rem;
+  background: #f8fafc;
+  min-height: calc(100vh - 64px);
+}
+
+.content-header-banner {
+  background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+  padding: 2rem;
+  border-radius: 1.5rem;
+  color: white;
+  margin-bottom: 2rem;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+
+  .breadcrumb-link {
+    color: #94a3b8;
+    text-decoration: none;
+    font-size: 0.85rem;
+    transition: color 0.2s;
+    &:hover { color: white; }
+  }
+
+  .title-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 1rem;
+
+    h1 {
+      font-size: 2.25rem;
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+
+      .badge-tag {
+        font-size: 0.75rem;
+        background: rgba(59, 130, 246, 0.2);
+        color: #60a5fa;
+        padding: 0.25rem 0.75rem;
+        border-radius: 2rem;
+        border: 1px solid rgba(59, 130, 246, 0.3);
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+      }
+    }
+
+    .actions {
+      display: flex;
+      gap: 0.75rem;
+    }
+  }
+}
+
+.profile-layout {
+  display: grid;
+  grid-template-columns: 320px 1fr;
+  gap: 2rem;
+}
+
+.card {
+  background: white;
+  border-radius: 1.25rem;
+  padding: 1.5rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  border: 1px solid #e2e8f0;
+}
+
+.patient-identity {
+  text-align: center;
+  position: sticky;
+  top: 2rem;
+
+  .avatar-block {
+    width: 100px;
+    height: 100px;
+    border-radius: 2.5rem;
+    background: #e2e8f0;
+    margin: 0 auto 1.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 3rem;
+    font-weight: 800;
+    color: #64748b;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+
+    &.urgency-high { background: #fee2e2; color: #ef4444; }
+    &.urgency-medium { background: #fef9c3; color: #eab308; }
+    &.urgency-low { background: #dcfce7; color: #22c55e; }
+  }
+
+  h2 { font-size: 1.5rem; font-weight: 800; color: #1e293b; margin-bottom: 0.25rem; }
+  p.id { font-size: 0.85rem; color: #64748b; margin-bottom: 1rem; span { font-weight: 700; color: #3b82f6; } }
+
+  .urgency-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.35rem 0.75rem;
+    border-radius: 0.5rem;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    margin-bottom: 2rem;
+
+    &.urgency-high { background: #ef4444; color: white; }
+    &.urgency-medium { background: #eab308; color: white; }
+    &.urgency-low { background: #22c55e; color: white; }
+  }
+}
+
+.quick-stats {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  margin-bottom: 2rem;
+  padding: 1rem;
+  background: #f8fafc;
+  border-radius: 1rem;
+
+  .stat {
+    text-align: center;
+    .label { font-size: 0.65rem; text-transform: uppercase; color: #94a3b8; font-weight: 700; display: block; }
+    .value { font-size: 1.25rem; font-weight: 800; color: #1e293b; }
+    .sub { font-size: 0.65rem; color: #64748b; }
+  }
+}
+
+.contact-card {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem;
+  background: white;
+  border: 1px solid #f1f5f9;
+  border-radius: 0.75rem;
+  margin-bottom: 0.75rem;
+  text-decoration: none;
+  transition: all 0.2s;
+
+  &:hover { background: #f8fafc; border-color: #3b82f6; }
+
+  i { font-size: 1.25rem; color: #3b82f6; background: #eff6ff; padding: 0.5rem; border-radius: 0.5rem; }
+  .info {
+    .lbl { font-size: 0.65rem; text-transform: uppercase; font-weight: 700; color: #94a3b8; display: block; }
+    .val { font-size: 0.9rem; font-weight: 700; color: #1e293b; }
+  }
+}
+
+.profile-workspace {
+  .section-title-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+
+    h3 {
+      font-size: 1.25rem;
+      font-weight: 800;
+      color: #1e293b;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      i { color: #3b82f6; }
+    }
+  }
+}
+
+.vitals-history-container {
+  margin-bottom: 3rem;
+  
+  .vitals-scroll-list {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1.25rem;
+  }
+}
+
+.vitals-entry-card {
+  background: white;
+  border-radius: 1rem;
+  padding: 1.25rem;
+  border: 1px solid #e2e8f0;
+  transition: all 0.2s;
+  
+  &:hover { box-shadow: 0 8px 25px rgba(0, 0, 0, 0.05); transform: translateY(-2px); }
+
+  .entry-header {
+    display: flex;
+    justify-content: space-between;
+    padding-bottom: 1rem;
+    border-bottom: 1px dashed #e2e8f0;
+    margin-bottom: 1rem;
+
+    .entry-meta {
+      display: flex;
+      gap: 1rem;
+      align-items: center;
+      .date { font-weight: 700; color: #1e293b; }
+      .time { color: #64748b; font-size: 0.85rem; }
+    }
+
+    .entry-actions { display: flex; gap: 0.5rem; }
+  }
+}
+
+.metrics-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1.5rem;
+
+  .metric {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+
+    i { font-size: 1.5rem; color: #94a3b8; }
+    
+    .val { font-size: 1.15rem; font-weight: 800; color: #1e293b; display: block; }
+    .lbl { font-size: 0.65rem; font-weight: 700; color: #64748b; text-transform: uppercase; }
+
+    &.highlight {
+      .val { color: #ef4444; }
+      i { color: #fecaca; }
+    }
+  }
+}
+
+.entry-notes {
+  margin-top: 1.25rem;
+  padding: 0.75rem;
+  background: #f1f5f9;
+  border-radius: 0.5rem;
+  font-size: 0.85rem;
+  color: #475569;
+}
+
+.empty-vitals {
+  background: white;
+  border: 2px dashed #e2e8f0;
+  padding: 4rem;
+  border-radius: 1rem;
+  text-align: center;
+  color: #94a3b8;
+
+  i { font-size: 3rem; display: block; margin-bottom: 1rem; }
+  p { margin-bottom: 1.5rem; font-weight: 600; }
+}
+
+// Clinical Modal Styles
+::ng-deep .clinical-modal {
+  .p-dialog-content { padding: 2rem; }
+  .p-dialog-header { background: #f8fafc; color: #1e293b; font-weight: 800; }
+}
+
+.vitals-form {
+  .form-grid-modal {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .form-group {
+    margin-bottom: 1.25rem;
+    label { display: block; margin-bottom: 0.5rem; font-weight: 700; color: #475569; font-size: 0.85rem; }
+    input, textarea {
+      width: 100%;
+      padding: 0.75rem;
+      border: 1px solid #cbd5e1;
+      border-radius: 0.75rem;
+      font-size: 1rem;
+      &:focus { border-color: #3b82f6; outline: none; box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1); }
+    }
+
+    ::ng-deep .p-dropdown {
+      @extend input;
+      padding: 0;
+      .p-dropdown-label { padding: 0.75rem; font-weight: 700; color: #1e293b; }
+      .p-dropdown-trigger { width: 3rem; }
+    }
+
+    .empty-hint {
+      margin-top: 0.5rem;
+      font-size: 0.75rem;
+      color: #ef4444;
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
+      font-weight: 600;
+    }
+  }
+}
+
+.modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+  margin-top: 2rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid #e2e8f0;
+}
+
+// Global Buttons & Utility
+.btn-primary { background: #2563eb; color: white; padding: 0.75rem 1.5rem; border-radius: 0.75rem; border: none; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 0.5rem; transition: all 0.2s; &:hover { background: #1d4ed8; transform: translateY(-1px); } }
+.btn-secondary { background: #f1f5f9; color: #475569; padding: 0.75rem 1.5rem; border-radius: 0.75rem; border: 1px solid #e2e8f0; font-weight: 700; cursor: pointer; transition: all 0.2s; &:hover { background: #e2e8f0; } }
+.btn-sm-primary { padding: 0.5rem 1rem; font-size: 0.85rem; @extend .btn-primary; }
+.btn-icon-outline { width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; border-radius: 12px; border: 1px solid rgba(255, 255, 255, 0.2); background: rgba(255, 255, 255, 0.1); color: white; cursor: pointer; transition: all 0.2s; &:hover { background: white; color: #1e293b; } }
+.btn-icon-flat { border: none; background: transparent; color: #64748b; padding: 0.25rem; cursor: pointer; font-size: 1.15rem; border-radius: 0.4rem; &:hover { background: #f1f5f9; color: #3b82f6; } &.danger:hover { background: #fee2e2; color: #ef4444; } }
+
+.spinner-sm { width: 16px; height: 16px; border: 2px solid rgba(255, 255, 255, 0.3); border-top-color: white; border-radius: 50%; animation: spin 1s linear infinite; display: none; &.show { display: block; } }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+@media (max-width: 1024px) {
+  .profile-layout { grid-template-columns: 1fr; }
+  .profile-sidebar { position: static; }
+}

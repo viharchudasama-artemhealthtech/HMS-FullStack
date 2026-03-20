@@ -1,0 +1,235 @@
+<p-dialog
+  [(visible)]="visible"
+  [header]="(labTest?.status === 'COMPLETED' ? 'View' : 'Record') + ' Lab Test Results - ' + labTest?.testName"
+  [modal]="true"
+  [style]="{ width: '90vw', maxWidth: '800px' }"
+  [contentStyle]="{ 'max-height': '70vh', 'overflow-y': 'auto' }"
+  (onHide)="closeDialog()"
+>
+  <div *ngIf="isLoadingReport" class="loading-report">
+    <i class="ri-loader-4-line spin"></i>
+    <span>Fetching lab report...</span>
+  </div>
+
+  <div *ngIf="!isLoadingReport && isReadOnly" class="report-content-view">
+    <div class="report-header-banner">
+      <div class="banner-icon"><i class="ri-file-list-3-line"></i></div>
+      <div class="banner-text">
+        <h3>Laboratory Investigation Report</h3>
+        <p>Finalized clinical findings and diagnostic results.</p>
+      </div>
+    </div>
+
+    <div class="report-results-grid">
+      <div class="report-item wide">
+        <label>Findings & Observations</label>
+        <div class="value-box highlight">{{ resultsForm.get('findings')?.value }}</div>
+      </div>
+      
+      <div class="report-row">
+        <div class="report-item">
+          <label>Result Value</label>
+          <div class="value-box status-pill">{{ resultsForm.get('result')?.value || 'N/A' }}</div>
+        </div>
+        <div class="report-item">
+          <label>Unit</label>
+          <div class="value-box">{{ resultsForm.get('unit')?.value || 'N/A' }}</div>
+        </div>
+      </div>
+
+      <div class="report-item">
+        <label>Reference Range</label>
+        <div class="value-box range-indicator">{{ resultsForm.get('referenceRange')?.value || 'N/A' }}</div>
+      </div>
+
+      <div class="report-item wide">
+        <label>Clinical Remarks</label>
+        <div class="value-box">{{ resultsForm.get('remarks')?.value || 'No additional remarks' }}</div>
+      </div>
+
+      <div class="report-footer">
+        <div class="footer-info">
+          <span class="label">Performed By:</span>
+          <span class="value">{{ resultsForm.get('performedBy')?.value }}</span>
+        </div>
+        <div class="footer-info" *ngIf="labTest?.completedDate">
+          <span class="label">Completed Date:</span>
+          <span class="value">{{ labTest.completedDate | date:'medium' }}</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal-footer-manual">
+      <button 
+        type="button" 
+        pButton 
+        label="Dismiss" 
+        class="p-button-text p-button-secondary" 
+        icon="pi pi-times" 
+        (click)="closeDialog()"
+      ></button>
+      <button 
+        type="button" 
+        pButton 
+        label="Print Report" 
+        class="p-button-primary" 
+        icon="pi pi-print"
+        (click)="appNotificationService.info('Print', 'Printing functionality coming soon')"
+      ></button>
+    </div>
+  </div>
+
+  <form *ngIf="!isLoadingReport && !isReadOnly" [formGroup]="resultsForm" (ngSubmit)="onSubmit()">
+    <!-- Test Information -->
+    <div class="test-info-box">
+      <h4>Test Information</h4>
+      <div class="info-grid">
+        <div class="info-item">
+          <label>Test Name:</label>
+          <span>{{ labTest?.testName }}</span>
+        </div>
+        <div class="info-item">
+          <label>Test Code:</label>
+          <span>{{ labTest?.testCode }}</span>
+        </div>
+        <div class="info-item">
+          <label>Patient:</label>
+          <span>{{ labTest?.patientName }}</span>
+        </div>
+        <div class="info-item">
+          <label>Category:</label>
+          <span>{{ labTest?.category || "-" }}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Error Message -->
+    <div *ngIf="errorMessage" class="error-message">
+      <p>{{ errorMessage }}</p>
+    </div>
+
+    <!-- Form Inputs -->
+    <div class="form-group">
+      <label for="findings">Test Findings *</label>
+      <textarea
+        id="findings"
+        formControlName="findings"
+        pInputTextarea
+        rows="5"
+        [class.ng-invalid]="
+          resultsForm.get('findings')?.invalid &&
+          resultsForm.get('findings')?.touched
+        "
+        placeholder="Enter detailed test findings and observations"
+      ></textarea>
+      <small
+        *ngIf="resultsForm.get('findings')?.hasError('required')"
+        class="error"
+      >
+        Findings are required
+      </small>
+      <small
+        *ngIf="resultsForm.get('findings')?.hasError('minlength')"
+        class="error"
+      >
+        Findings must be at least 5 characters
+      </small>
+    </div>
+
+    <div class="form-group">
+      <label for="result">Test Result</label>
+      <input
+        id="result"
+        type="text"
+        formControlName="result"
+        pInputText
+        placeholder="Enter test result value"
+      />
+      <small
+        *ngIf="resultsForm.get('result')?.hasError('maxlength')"
+        class="error"
+      >
+        Result must not exceed 1000 characters
+      </small>
+    </div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label for="unit">Unit of Measurement</label>
+        <input
+          id="unit"
+          type="text"
+          formControlName="unit"
+          pInputText
+          placeholder="e.g., mg/dL, g/L"
+        />
+      </div>
+
+      <div class="form-group">
+        <label for="referenceRange">Reference Range</label>
+        <input
+          id="referenceRange"
+          type="text"
+          formControlName="referenceRange"
+          pInputText
+          placeholder="e.g., 70-100 mg/dL"
+        />
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label for="performedBy">Performed By (Staff Name) *</label>
+      <input
+        id="performedBy"
+        type="text"
+        formControlName="performedBy"
+        pInputText
+        [class.ng-invalid]="
+          resultsForm.get('performedBy')?.invalid &&
+          resultsForm.get('performedBy')?.touched
+        "
+        placeholder="Your name"
+      />
+      <small
+        *ngIf="resultsForm.get('performedBy')?.hasError('required')"
+        class="error"
+      >
+        Staff name is required
+      </small>
+    </div>
+
+    <div class="form-group">
+      <label for="remarks">Remarks</label>
+      <textarea
+        id="remarks"
+        formControlName="remarks"
+        pInputTextarea
+        rows="3"
+        placeholder="Any additional remarks or notes about the test"
+      ></textarea>
+    </div>
+
+    <!-- Modal Footer Section -->
+    <div class="modal-footer-manual">
+      <button 
+        type="button" 
+        pButton 
+        label="Close" 
+        class="p-button-text p-button-secondary" 
+        icon="pi pi-times" 
+        (click)="closeDialog()"
+      ></button>
+      
+      <button 
+        *ngIf="!isReadOnly"
+        type="submit" 
+        pButton 
+        label="Submit Results" 
+        class="p-button-primary" 
+        icon="pi pi-check"
+        [loading]="isSubmitting"
+        [disabled]="resultsForm.invalid || isSubmitting"
+      ></button>
+    </div>
+  </form>
+</p-dialog>

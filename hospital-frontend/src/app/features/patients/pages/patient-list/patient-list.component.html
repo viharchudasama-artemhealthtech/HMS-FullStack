@@ -1,0 +1,110 @@
+<div class="dashboard-layout">
+  <app-sidebar></app-sidebar>
+  
+  <main class="main-content">
+    <app-header></app-header>
+
+    <div class="page-body">
+      <!-- Direct & Clean Header -->
+      <div class="content-header">
+        <div class="title-section">
+          <h1>Patient Directory</h1>
+          <p>Standardized clinical database management</p>
+        </div>
+        <div class="header-actions">
+          <button class="btn-primary" routerLink="/patients/register" *ngIf="canRegister()">
+            <i class="ri-user-add-line"></i> Register Patient
+          </button>
+        </div>
+      </div>
+
+      <!-- Compact Search & Filter Bar -->
+      <div class="filter-bar">
+        <div class="search-field">
+          <i class="ri-search-line"></i>
+          <input 
+            type="text" 
+            [(ngModel)]="searchTerm" 
+            (input)="onSearchInput()"
+            placeholder="Search by name, ID or contact..."
+          >
+        </div>
+        
+        <div class="filter-options">
+          <button class="btn-excel" (click)="exportToExcel()" *ngIf="patients.length > 0">
+            <i class="ri-file-excel-2-line"></i> Download Excel
+          </button>
+        </div>
+      </div>
+
+      <!-- Simplified Patient Table -->
+      <div class="card p-0 table-container">
+        <p-table
+          [value]="patients"
+          [loading]="isLoading"
+          [paginator]="true"
+          [rows]="pageSize"
+          [totalRecords]="totalElements"
+          [lazy]="true"
+          (onLazyLoad)="onPageChange($event)"
+          styleClass="p-datatable-sm clinical-table"
+          responsiveLayout="stack"
+        >
+          <ng-template pTemplate="header">
+            <tr>
+              <th style="width: 25%">Patient Name</th>
+              <th style="width: 10%">Age</th>
+              <th style="width: 15%">Blood Group</th>
+              <th style="width: 15%">Urgency</th>
+              <th style="width: 15%">Contact</th>
+              <th style="width: 10%">Joined</th>
+              <th style="width: 10%" style="text-align: center;">Actions</th>
+            </tr>
+          </ng-template>
+
+          <ng-template pTemplate="body" let-patient>
+            <tr>
+              <td>
+                <div class="name-col">
+                  <div class="avatar-sm" [ngClass]="getUrgencyClass(patient.urgencyLevel)">
+                    {{ patient.name | slice:0:1 }}
+                  </div>
+                  <span class="full-name">{{ patient.name }}</span>
+                </div>
+              </td>
+              <td>{{ patient.age }} yrs</td>
+              <td>
+                <span class="bg-label">{{ patient.bloodGroup.replace('_POSITIVE', '+').replace('_NEGATIVE', '-') }}</span>
+              </td>
+              <td>
+                <span class="urgency-dot" [ngClass]="getUrgencyClass(patient.urgencyLevel)"></span>
+                {{ patient.urgencyLevel }}
+              </td>
+              <td class="contact-cell">{{ patient.contactNumber }}</td>
+              <td class="date-cell">{{ patient.createdAt | date:'shortDate' }}</td>
+              <td class="action-cell">
+                <div class="action-buttons" (click)="$event.stopPropagation()">
+                  <!-- Edit Patient -->
+                  <button class="btn-icon btn-edit" (click)="editPatient(patient.id)" *ngIf="canEdit()" title="Modify Data">
+                    <i class="ri-edit-line"></i>
+                  </button>
+
+                  <!-- Delete Record -->
+                  <button class="btn-icon btn-delete" (click)="deletePatient(patient.id)" *ngIf="canDelete()" title="Remove Patient">
+                    <i class="ri-delete-bin-line"></i>
+                  </button>
+                </div>
+              </td>
+            </tr>
+          </ng-template>
+
+          <ng-template pTemplate="emptymessage">
+            <tr>
+              <td colspan="7" class="empty-msg">No medical records found matching your criteria.</td>
+            </tr>
+          </ng-template>
+        </p-table>
+      </div>
+    </div>
+  </main>
+</div>

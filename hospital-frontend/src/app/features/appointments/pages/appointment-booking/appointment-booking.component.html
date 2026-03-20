@@ -1,0 +1,240 @@
+<div class="dashboard-layout">
+  <app-sidebar></app-sidebar>
+
+  <main class="main-content">
+    <app-header></app-header>
+
+    <div class="page-body">
+      <div class="content-header">
+        <div class="title-section">
+          <h1>{{ isEditMode ? 'Edit Appointment' : 'Book Appointment' }}</h1>
+          <p>{{ isEditMode ? 'Update the consultation slot and assignment' : 'Schedule a new medical consultation' }}</p>
+        </div>
+        <div class="header-actions">
+          <button class="btn-outline" routerLink="/appointments">
+            <i class="ri-arrow-left-line"></i> Back to Schedule
+          </button>
+        </div>
+      </div>
+
+      <div class="booking-form-card">
+        <form [formGroup]="bookingForm" (ngSubmit)="onSubmit()">
+          <div class="form-shell">
+          <div class="form-section section-wide">
+            <div class="section-title">
+              <div class="section-icon"><i class="ri-calendar-check-line"></i></div>
+              <div class="section-copy">
+                <h3>Visit Details</h3>
+                <p>Choose the patient, department, doctor, and preferred consultation slot.</p>
+              </div>
+            </div>
+          <div class="form-grid two-column">
+            <!-- Patient Selection -->
+            <div class="form-group" *ngIf="!isPatient">
+              <label class="form-label" for="patientId">Select Patient</label>
+              <p-dropdown
+                inputId="patientId"
+                formControlName="patientId"
+                [options]="patientOptions()"
+                optionLabel="label"
+                optionValue="value"
+                placeholder="Choose a patient..."
+                [filter]="true"
+                filterBy="label"
+                styleClass="w-full"
+              ></p-dropdown>
+              <div
+                class="error-msg"
+                *ngIf="
+                  bookingForm.get('patientId')?.touched &&
+                  bookingForm.get('patientId')?.invalid
+                "
+              >
+                <small>Patient is required</small>
+              </div>
+            </div>
+
+            <div class="form-group" *ngIf="isPatient">
+              <label class="form-label">Patient Name</label>
+              <div class="input-wrapper disabled">
+                <i class="ri-user-heart-line icon"></i>
+                <input
+                  type="text"
+                  class="form-control"
+                  [value]="(currentUser$ | async)?.username"
+                  disabled
+                />
+              </div>
+            </div>
+
+            <!-- Department Selection -->
+            <div class="form-group">
+              <label class="form-label" for="department"
+                >Select Department</label
+              >
+              <p-dropdown
+                inputId="department"
+                formControlName="department"
+                [options]="departmentOptions()"
+                optionLabel="label"
+                optionValue="value"
+                placeholder="Choose a department..."
+                styleClass="w-full"
+                (onChange)="onDepartmentChange($event.value)"
+              ></p-dropdown>
+              <div
+                class="error-msg"
+                *ngIf="
+                  bookingForm.get('department')?.touched &&
+                  bookingForm.get('department')?.invalid
+                "
+              >
+                <small>Department is required</small>
+              </div>
+            </div>
+
+            <!-- Doctor Selection -->
+            <div class="form-group">
+              <label class="form-label" for="doctorId">Select Doctor</label>
+              <p-dropdown
+                inputId="doctorId"
+                formControlName="doctorId"
+                [options]="doctorOptions()"
+                optionLabel="label"
+                optionValue="value"
+                [disabled]="!selectedDepartment || filteredDoctors.length === 0"
+                [placeholder]="!selectedDepartment ? 'Select a department first' : (filteredDoctors.length === 0 ? 'No doctors available' : 'Choose a doctor...')"
+                styleClass="w-full"
+              ></p-dropdown>
+              <small class="helper-text" *ngIf="selectedDepartment && filteredDoctors.length > 0">
+                {{ filteredDoctors.length }} doctor{{ filteredDoctors.length > 1 ? 's are' : ' is' }} available in this department
+              </small>
+              <small class="helper-text warning" *ngIf="selectedDepartment && filteredDoctors.length === 0">
+                No doctors found for {{ getDepartmentLabel(selectedDepartment) }}.
+              </small>
+              <div
+                class="error-msg"
+                *ngIf="
+                  (bookingForm.get('doctorId')?.touched || formSubmitted) &&
+                  bookingForm.get('doctorId')?.invalid
+                "
+              >
+                <small>Doctor is required</small>
+              </div>
+            </div>
+
+            <!-- Date -->
+            <div class="form-group">
+              <label class="form-label" for="appointmentDate"
+                >Appointment Date</label
+              >
+              <div class="input-wrapper">
+                <i class="ri-calendar-line icon"></i>
+                <p-calendar
+                  inputId="appointmentDate"
+                  formControlName="appointmentDate"
+                  [showIcon]="true"
+                  [minDate]="minDate"
+                  dateFormat="yy-mm-dd"
+                  styleClass="w-full"
+                ></p-calendar>
+              </div>
+              <div class="error-msg" *ngIf="(bookingForm.get('appointmentDate')?.touched || formSubmitted) && bookingForm.get('appointmentDate')?.invalid">
+                <small>Appointment date is required</small>
+              </div>
+            </div>
+
+            <!-- Time -->
+            <div class="form-group">
+              <label class="form-label" for="appointmentTime"
+                >Preferred Time</label
+              >
+              <div class="input-wrapper">
+                <i class="ri-time-line icon"></i>
+                <p-calendar
+                  inputId="appointmentTime"
+                  formControlName="appointmentTime"
+                  [timeOnly]="true"
+                  [showIcon]="true"
+                  hourFormat="24"
+                  styleClass="w-full"
+                ></p-calendar>
+              </div>
+              <div class="error-msg" *ngIf="(bookingForm.get('appointmentTime')?.touched || formSubmitted) && bookingForm.get('appointmentTime')?.invalid">
+                <small>Preferred time is required</small>
+              </div>
+            </div>
+
+            <!-- Emergency Toggle (Only for staff) -->
+            <div class="form-group full-width" *ngIf="authService.getUserRole() !== 'PATIENT'">
+              <div class="emergency-toggle-card" [class.active]="bookingForm.get('isEmergency')?.value">
+                <div class="toggle-content">
+                  <div class="toggle-icon"><i class="ri-alarm-warning-line"></i></div>
+                  <div class="toggle-copy">
+                    <label class="form-label" for="isEmergency">Emergency Override</label>
+                    <p>Bypasses time restrictions and prioritizes the patient in the queue.</p>
+                  </div>
+                </div>
+                <p-inputSwitch inputId="isEmergency" formControlName="isEmergency"></p-inputSwitch>
+              </div>
+            </div>
+
+            <!-- Reason -->
+            <div class="form-group full-width">
+              <label class="form-label" for="reason"
+                >Reason for Appointment</label
+              >
+              <input
+                pInputText
+                type="text"
+                id="reason"
+                formControlName="reason"
+                class="form-control"
+                placeholder="E.g. Regular Checkup, Follow-up"
+              />
+              <div class="error-msg" *ngIf="(bookingForm.get('reason')?.touched || formSubmitted) && bookingForm.get('reason')?.invalid">
+                <small>Reason is required and must be at least 3 characters</small>
+              </div>
+            </div>
+
+            <!-- Notes -->
+            <div class="form-group full-width">
+              <label class="form-label" for="notes"
+                >Additional Notes (Optional)</label
+              >
+              <textarea
+                pInputTextarea
+                id="notes"
+                formControlName="notes"
+                class="form-control"
+                rows="4"
+                placeholder="Mention any specific symptoms or requests..."
+              ></textarea>
+            </div>
+          </div>
+          </div>
+
+          <div class="error-alert" *ngIf="errorMessage">
+            <i class="ri-error-warning-line"></i> {{ errorMessage }}
+          </div>
+
+          <div class="form-actions">
+            <button
+              type="button"
+              class="btn-outline"
+              routerLink="/appointments"
+            >
+              Cancel
+            </button>
+            <button type="submit" class="btn-primary" [disabled]="isLoading">
+              <i class="ri-check-line" *ngIf="!isLoading"></i>
+              <i class="ri-loader-4-line spin" *ngIf="isLoading"></i>
+              {{ isLoading ? (isEditMode ? "Saving..." : "Booking...") : (isEditMode ? "Save Appointment" : "Confirm Appointment") }}
+            </button>
+          </div>
+          </div>
+        </form>
+      </div>
+    </div>
+  </main>
+</div>

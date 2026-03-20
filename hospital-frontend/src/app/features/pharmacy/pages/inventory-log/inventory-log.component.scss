@@ -1,0 +1,44 @@
+.dashboard-layout {
+  display: flex;
+  min-height: 100vh;
+}
+
+.main-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.page-body {
+  padding: 2rem;
+  max-width: 1480px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.text-success { color: var(--status-success) !important; }
+.text-danger { color: var(--status-error) !important; }
+.fw-bold { font-weight: 700; }
+.fs-6 { font-size: 1.1rem; }
+
+.med-name {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  
+  strong {
+    color: var(--text-main);
+    font-size: 0.95rem;
+  }
+}
+
+.status-badge {
+    padding: 0.35rem 0.85rem;
+    font-weight: 700;
+    font-size: 0.75rem;
+}
+
+.code-badge.small {
+    font-size: 0.7rem;
+    padding: 0.15rem 0.45rem;
+}

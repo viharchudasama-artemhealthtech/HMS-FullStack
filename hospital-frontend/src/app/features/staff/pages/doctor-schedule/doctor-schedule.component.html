@@ -1,0 +1,118 @@
+<div class="main-content-layout">
+  <app-sidebar></app-sidebar>
+
+  <div class="content-wrapper">
+    <app-header title="Manage Doctor Schedule"></app-header>
+
+    <div class="schedule-container" *ngIf="doctor">
+      <div class="header-section">
+        <div class="title-group">
+          <h1>Schedules for Dr. {{ doctor.firstName }} {{ doctor.lastName }}</h1>
+          <p>Configure weekly availability and slot durations.</p>
+        </div>
+        <button type="button" class="btn-text-action" routerLink="/staff">
+            <i class="ri-arrow-left-line"></i> Back to Doctors
+        </button>
+      </div>
+
+      <div class="content-grid">
+        <!-- List Section -->
+        <div class="schedule-list-card">
+          <h2>Existing Availability</h2>
+
+          <div *ngIf="schedules.length === 0 && !isLoading" class="empty-state">
+              <i class="ri-calendar-todo-line"></i>
+              <p>No schedules defined for this doctor yet.</p>
+              <small>Use the form to add availability slots.</small>
+          </div>
+
+          <div class="table-container" *ngIf="schedules.length > 0">
+            <table class="schedule-table">
+              <thead>
+                <tr>
+                  <th>Day</th>
+                  <th>Shift Time</th>
+                  <th>Slot Duration</th>
+                  <th class="actions-col">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let s of schedules">
+                  <td>
+                    <span class="day-badge">{{ dayLabels[s.dayOfWeek] }}</span>
+                  </td>
+                  <td>
+                    <div class="time-cell">
+                        <i class="ri-time-line"></i>
+                        <span>{{ formatTime(s.startTime) }} - {{ formatTime(s.endTime) }}</span>
+                    </div>
+                  </td>
+                  <td>
+                    <div class="time-cell">
+                        <i class="ri-timer-line"></i>
+                        <span>{{ s.slotDurationMinutes }} mins</span>
+                    </div>
+                  </td>
+                  <td>
+                    <button class="btn-delete" (click)="onDelete(s.id)" title="Delete Schedule">
+                      <i class="ri-delete-bin-line"></i>
+                    </button>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Form Section -->
+        <div class="form-card">
+          <h2>Add New Slot</h2>
+          <form [formGroup]="scheduleForm" (ngSubmit)="onSubmit()">
+            <div class="form-group">
+              <label>Day of the Week</label>
+              <select formControlName="dayOfWeek">
+                <option value="" disabled>Select day...</option>
+                <option *ngFor="let day of days" [value]="day">{{ dayLabels[day] }}</option>
+              </select>
+            </div>
+
+            <div class="time-row">
+              <div class="form-group">
+                <label>Start Time</label>
+                <input type="time" formControlName="startTime">
+              </div>
+              <div class="form-group">
+                <label>End Time</label>
+                <input type="time" formControlName="endTime">
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label>Slot Duration (Minutes)</label>
+              <select formControlName="slotDurationMinutes">
+                <option [value]="15">15 Minutes</option>
+                <option [value]="20">20 Minutes</option>
+                <option [value]="30" selected>30 Minutes</option>
+                <option [value]="45">45 Minutes</option>
+                <option [value]="60">60 Minutes</option>
+              </select>
+            </div>
+
+            <button type="submit" class="btn-primary" [disabled]="scheduleForm.invalid || isSaving">
+              <span *ngIf="!isSaving">
+                <i class="ri-add-line"></i> Create Slot
+              </span>
+              <span *ngIf="isSaving">Creating...</span>
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- Outer Loading State -->
+    <div class="loading-overlay" *ngIf="isLoading && !doctor">
+        <div class="spinner"></div>
+        <p>Loading doctor profile...</p>
+    </div>
+  </div>
+</div>

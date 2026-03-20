@@ -1,0 +1,243 @@
+.header-btns {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.85rem;
+}
+
+.welcome .username {
+  color: var(--brand-primary);
+  font-weight: 800;
+}
+
+.hero-panel {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 1.5rem;
+  margin-bottom: 1.75rem;
+  padding: 1.75rem;
+  border-radius: var(--radius-2xl);
+  background:
+    linear-gradient(135deg, rgba(15, 108, 189, 0.94), rgba(27, 154, 170, 0.88)),
+    radial-gradient(
+      circle at top right,
+      rgba(255, 255, 255, 0.22),
+      transparent 34%
+    );
+  color: white;
+  box-shadow: var(--shadow-lg);
+
+  .eyebrow {
+    display: inline-flex;
+    margin-bottom: 0.85rem;
+    padding: 0.4rem 0.75rem;
+    border-radius: var(--radius-full);
+    background: rgba(255, 255, 255, 0.12);
+    font-size: 0.78rem;
+    font-weight: 800;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+  }
+
+  h2 {
+    color: white;
+    font-size: clamp(1.6rem, 2.5vw, 2.35rem);
+    line-height: 1.05;
+    margin-bottom: 0.75rem;
+  }
+
+  p {
+    color: rgba(255, 255, 255, 0.88);
+    max-width: 44rem;
+  }
+}
+
+.hero-metrics {
+  display: grid;
+  gap: 0.85rem;
+}
+
+.hero-metric {
+  padding: 1rem 1.1rem;
+  border-radius: var(--radius-xl);
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+
+  strong {
+    display: block;
+    font-family: var(--font-heading);
+    font-size: 1.7rem;
+    margin-bottom: 0.15rem;
+  }
+
+  span {
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 0.85rem;
+    font-weight: 700;
+  }
+}
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(225px, 1fr));
+  gap: 1.15rem;
+  margin-bottom: 1.75rem;
+}
+
+.stat-card {
+  padding: 1.3rem;
+  border-radius: var(--radius-2xl);
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  background: var(--bg-card);
+  border: 1px solid rgba(255, 255, 255, 0.7);
+  box-shadow: var(--shadow-md);
+}
+
+.stat-icon {
+  width: 56px;
+  height: 56px;
+  border-radius: 18px;
+  display: grid;
+  place-items: center;
+  font-size: 1.45rem;
+
+  &.patient {
+    background: rgba(15, 108, 189, 0.12);
+    color: var(--brand-primary);
+  }
+  &.appointment {
+    background: rgba(27, 154, 170, 0.12);
+    color: var(--brand-secondary);
+  }
+  &.earnings {
+    background: rgba(255, 143, 61, 0.14);
+    color: #c66b20;
+  }
+  &.surgery {
+    background: rgba(16, 152, 104, 0.12);
+    color: var(--status-success);
+  }
+}
+
+.stat-info {
+  display: flex;
+  flex-direction: column;
+
+  .label {
+    color: var(--text-muted);
+    font-size: 0.82rem;
+    font-weight: 700;
+    margin-bottom: 0.35rem;
+  }
+
+  .value {
+    font-family: var(--font-heading);
+    font-size: 1.65rem;
+    line-height: 1;
+    margin-bottom: 0.45rem;
+  }
+
+  .trend {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    color: var(--text-muted);
+    font-size: 0.76rem;
+    font-weight: 700;
+  }
+
+  .trend.up {
+    color: var(--status-success);
+  }
+}
+
+.dashboard-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
+  gap: 1.15rem;
+}
+
+.grid-card {
+  overflow: hidden;
+
+  &.chart-container {
+    min-height: 430px;
+  }
+
+  &.full-width {
+    grid-column: 1 / -1;
+
+    .chart-stage {
+      height: 458px;
+      min-height: 458px;
+      max-height: 458px;
+    }
+  }
+}
+
+.card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1.2rem 1.35rem;
+  border-bottom: 1px solid var(--border-color);
+
+  h3 {
+    font-size: 1.1rem;
+    margin-bottom: 0.2rem;
+  }
+
+  .subtitle {
+    color: var(--text-muted);
+    font-size: 0.84rem;
+  }
+}
+
+.card-badge {
+  padding: 0.45rem 0.75rem;
+  border-radius: var(--radius-full);
+  background: rgba(15, 108, 189, 0.08);
+  color: var(--brand-primary);
+  font-size: 0.76rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.card-body {
+  padding: 1.25rem;
+  height: calc(100% - 76px);
+}
+
+.chart-stage {
+  position: relative;
+  height: 320px;
+  min-height: 320px;
+  max-height: 320px;
+}
+
+.chart-stage canvas {
+  display: block;
+  width: 100% !important;
+  height: 100% !important;
+}
+
+@media (max-width: 1024px) {
+  .hero-panel {
+    grid-template-columns: 1fr;
+  }
+
+  .dashboard-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  .chart-stage {
+    height: 260px;
+    min-height: 260px;
+    max-height: 260px;
+  }
+}
