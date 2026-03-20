@@ -1,157 +1,133 @@
-# 🏥 HMS - Advanced Full-Stack Hospital Management System
+# 🏥 HMS Core - Unified Healthcare Operations Platform
 
-A production-grade, real-time Hospital Management System (HMS) built with **Spring Boot 3**, **Angular 17**, and **PostgreSQL**. Designed for high-reliability medical environments with concurrency protection, real-time triage, and automated clinical workflows.
+A high-performance, production-ready Hospital Management System (HMS) architected for mission-critical medical environments. Built on **Spring Boot 3 (Java 17)** and **Angular 17**, it features real-time triage, industrial-grade concurrency protection, and automated financial workflows.
 
 ---
 
-## 🏗️ "System Architecture"
+## 🏗️ System Design Architecture
+
+The platform follows a distributed, modular monolith pattern designed for vertical scalability and high availability.
 
 ```mermaid
-graph TD
-    subgraph Client_Side [Frontend - Angular]
-        UI[User Interface]
-        SG[State Management]
-        WS_C[WebSocket Client - SockJS/STOMP]
+graph TB
+    subgraph Client_Tier [Presentation Layer - Angular 17]
+        WEB[Web Portal - PrimeNG]
+        STATE[RxJS State Management]
+        WS_C[STOMP WebSocket Client]
     end
 
-    subgraph Security_Layer [Security]
-        JWT[JWT Authentication Filter]
-        CORS[CORS Config]
-        WSC[WebSecurity Customizer - Handshake Bypass]
+    subgraph Security_Gateway [Security & API Gateway]
+        JWT[Stateless JWT Filter]
+        ROLE[RBAC - Role Based Access]
+        CORS[CORS Policy Manager]
     end
 
-    subgraph Backend_App [Backend - Spring Boot 3]
-        AC[Appointment Controller]
-        PC[Patient Controller]
-        BC[Billing Controller]
-        MM[Pharmacy/Medicine Manager]
-        STOMP[STOMP Broker - Real-time Updates]
+    subgraph Logic_Tier [Application Layer - Spring Boot 3]
+        subgraph Core_Services [Business Logic Units]
+            APT[Appointment Engine]
+            CLI[Clinical Records & Vitals]
+            PHAR[Pharmacy & Inventory Log]
+            BILL[Billing & Tax Manager]
+        end
+        LOCK[Pessimistic Locking Manager]
+        AUDIT[Global Audit Interceptor]
     end
 
-    subgraph Database_Layer [Data & Persistence]
-        DB[(PostgreSQL)]
-        Audit[Audit Log Persistence]
-        Lock[Pessimistic Locking - Slot Safety]
+    subgraph Data_Tier [Persistence Layer]
+        DB[(PostgreSQL 15)]
+        REDIS[[Proposed: Redis Cache]]
     end
 
-    UI --> JWT
-    JWT --> AC & PC & BC & MM
-    WS_C <--> STOMP
-    AC & PC & BC & MM --> DB
-    AC --> Lock
-    PC & BC --> Audit
+    WEB --> JWT
+    JWT --> APT & CLI & PHAR & BILL
+    APT --> LOCK
+    APT & CLI & PHAR & BILL --> AUDIT
+    AUDIT & LOCK --> DB
 ```
 
 ---
 
-## 📊 Database Entity-Relationship (ER) Diagram
+## 🔄 Interaction Flow: Appointment Booking
+This sequence diagram illustrates the lifecycle of a patient booking, highlighting the **Concurrency Control** and **Token Generation** logic.
 
 ```mermaid
-erDiagram
-    USER ||--o| PATIENT : "is_a"
-    USER ||--o| DOCTOR : "is_a"
-    PATIENT ||--o{ APPOINTMENT : "schedules"
-    DOCTOR ||--o{ APPOINTMENT : "manages"
-    PATIENT ||--o{ VITALS : "has"
-    PATIENT ||--o{ BILLING : "receives"
-    PATIENT ||--o{ PRESCRIPTION : "gets"
-    DOCTOR ||--o{ PRESCRIPTION : "signs"
-    BILLING ||--|{ BILLING_ITEM : "contains"
-    MEDICINE ||--o{ PRESCRIPTION_MEDICINE : "listed_in"
-    PRESCRIPTION ||--|{ PRESCRIPTION_MEDICINE : "prescribes"
-    MEDICINE ||--o{ INVENTORY_TRANSACTION : "logged_in"
+sequenceDiagram
+    participant U as User (UI)
+    participant C as Appointment Controller
+    participant S as Appointment Service
+    participant L as Database (Pessimistic Lock)
+    participant T as Token Generator
+
+    U->>C: POST /api/v1/appointments
+    C->>S: createAppointment(DTO)
+    S->>L: FOR UPDATE (Lock Doctor Slot)
+    Note over L: Prevents Double-Booking
+    L-->>S: Slot Secured
+    S->>S: Validate Clinic Hours & Shift
+    alt Valid Slot
+        S->>T: Generate Alphanumeric Token
+        T-->>S: "P-104" or "EM-002"
+        S->>L: Persist Appointment
+        S-->>C: Response (AppointmentDTO)
+        C-->>U: Success (201 Created)
+    else Invalid Shift/Overlap
+        S-->>C: Throw BusinessException
+        C-->>U: Error 400 (Slot Unavailable)
+    else Emergency Override
+        S->>T: Skip Lock & Generate "EM" Token
+        S->>L: Force Persist
+        S-->>C: Response
+        C-->>U: Success
+    end
 ```
 
 ---
 
-## 🌟 Key Features
+## 🌟 Professional Feature Set
 
-### 📅 Advanced Appointment & Triage
-*   **Real-time Dashboard**: Live updates when patients check in via WebSockets.
-*   **Emergency Overrides**: "EM-" token system to squeeze urgent cases into full schedules.
-*   **Pessimistic Slot Locking**: Prevents double-booking at the database level.
-*   **Alphanumeric Tokens**: Professional `P-101` and `EM-005` queue tracking.
+### 🏥 Clinical Operations
+*   **Intelligent Triage:** Automated token system (`P-` for Standard, `EM-` for Emergency) with override priority.
+*   **Vitals Lifecycle:** Real-time patient monitoring (BP, SpO2, Pulse) with historical trend tracking.
+*   **Digital Prescription Engine:** Linked directly to the Pharmacy catalog for instant medicine lookup.
 
-### 🩺 Clinical Management
-*   **Digital Prescriptions**: Linked to pharmacy inventory with auto-lookup.
-*   **Vitals Tracking**: Pulse, BP, Weight, and SpO2 history timeline.
-*   **Doctor Workflow**: Status transitions from `SCHEDULED` → `CHECKED_IN` → `IN_CONSULTATION` → `COMPLETED`.
+### 💰 Revenue Cycle Management (Finance)
+*   **GST Integrated Invoicing:** Automated 5% tax calculation and service-wise breakdown.
+*   **Insurance/TPA Workflows:** Native support for claims numbers and insurance provider tracking.
+*   **Global Export Center:** Audit-ready exports to Excel/CSV for all financial reports (Appointments, Patients, Medicine).
 
-### 💊 Pharmacy & Inventory
-*   **Live Stock Monitoring**: Real-time inventory logs with transaction history.
-*   **Expiry Alerts**: Proactive identification of low-stock and near-expiry medicines.
-*   **Prescription Integration**: Instant stock deduction upon medication issuance.
-
-### 💰 Billing & Finance (Enterprise Grade)
-*   **Automated GST**: Real-time 5% tax calculation integrated into invoices.
-*   **Insurance/TPA Support**: Track claim numbers and insurance providers.
-*   **Global Export**: One-click "Export to Excel" for audit and accounting.
+### 💊 Supply Chain & Pharmacy
+*   **FIFO Inventory Log:** Strict transaction logging for every medicine issued or received.
+*   **Low Stock Surveillance:** Automated identification of medicines falling below safety thresholds.
 
 ---
 
-## 🛠️ Advanced Production Patterns Implemented
-1.  **Global Object Shims**: Managed compatibility for STOMP/SockJS in modern browser environments.
-2.  **Spring Security Bypassing**: Custom `WebSecurityCustomizer` for high-performance WebSocket handshakes.
-3.  **Auditable Entities**: Automated `createdAt`, `updatedAt`, and `createdBy` tracking for all medical records.
+## 🛠️ Technology Stack & Patterns
+
+| Layer | Technology | Key Implementation |
+| :--- | :--- | :--- |
+| **Frontend** | Angular 17+ | Standalone components, RxJS, PrimeNG Premium UI |
+| **Backend** | Spring Boot 3.3 | RESTful Micro-controllers, Lombok, MapStruct |
+| **Security** | Spring Security 6 | Stateless JWT, RBAC, Password Hashing |
+| **Data** | PostgreSQL + JPA | Pessimistic Locking, Auditable Entities |
+| **Real-time** | WebSocket (STOMP) | Live Dashboard stats and triage updates |
 
 ---
 
-## 🖥️ Frontend Pages (Total: 10 Modules)
-| Module | Primary Pages |
-| :--- | :--- |
-| **Dashboard** | Admin Overview, Doctor Queue, Patient Portal |
-| **Appointments** | Live Schedule, Booking Form, Emergency Triage |
-| **Patients** | Patient Directory, Profile View, Visit History |
-| **Clinical** | Vitals Entry, Prescription Builder, Consultation Notes |
-| **Pharmacy** | Medicine List, Inventory Logs, Stock Manager |
-| **Billing** | Invoice List, Create Invoice, Insurance Tracker |
-| **Staff** | Doctor Management, Schedule Planner |
+## 🚦 Getting Started
+
+### Backend (Core API)
+1. Ensure **JDK 17** and **Maven** are installed.
+2. Update `backend/src/main/resources/application.properties` with PostgreSQL credentials.
+3. Run: `mvn clean spring-boot:run`
+
+### Frontend (User Interface)
+1. Ensure **Node.js 18+** is installed.
+2. `cd frontend && npm install`
+3. Run: `ng serve` (Access at `http://localhost:4200`)
 
 ---
 
-## 🔌 Core API Endpoints
-
-### Authentication
-*   `POST /api/auth/login` - JWT Token generation
-*   `POST /api/auth/register` - User onboarding
-
-### Appointments
-*   `GET /api/appointments` - All visits
-*   `POST /api/appointments` - Book (with overlap checks)
-*   `PATCH /api/appointments/{id}/status` - Workflow updates
-
-### Medicine & Inventory
-*   `GET /api/inventory/transactions` - Audit logs
-*   `POST /api/medicines` - Manage medicine data
-
----
-
-## 🚀 Getting Started
-
-### Prerequisites
-*   Java 17 / Maven
-*   Node.js 18+ / Angular CLI
-*   PostgreSQL 14+
-
-### Backend Setup
-1. `cd backend`
-2. Configure `src/main/resources/application.properties` with your DB credentials.
-3. Run `./mvnw spring-boot:run`
-
-### Frontend Setup
-1. `cd frontend`
-2. `npm install`
-3. `ng serve` (Available at http://localhost:4200)
-
-### 🧹 Linting & Formatting
-*   `npm run lint` - Run ESLint check
-*   `npm run lint:fix` - Auto-fix lint errors
-*   `npm run format` - Format code with Prettier
-
----
-
-## 🗺️ Roadmap (Future Scope)
-*   [ ] **Redis Caching**: To handle 10,000+ simultaneous availability checks.
-*   [ ] **S3 Document Storage**: Move X-ray and Lab PDF files to encrypted cloud buckets.
-*   [ ] **Full-Text Search**: Elasticsearch integration for patient clinical notes.
-*   [ ] **Telemedicine**: Integrated WebRTC video consultations.
+## 🔒 Reliability Engineering
+*   **Atomic Transactions:** All critical medical records are wrapped in `@Transactional` to ensure zero data corruption.
+*   **Audit Trail:** Every change is timestamped (UTC) and linked to the user via `Auditable` hooks.
+*   **Soft Deletion:** Medical records are never purged; they use a `deleted` flag to maintain a lifetime audit history.
