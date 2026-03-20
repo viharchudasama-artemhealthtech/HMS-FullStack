@@ -5390,3 +5390,83 @@ java.lang.NumberFormatException: For input string: "P-001"
 2026-03-20 16:55:22.869 [http-nio-8082-exec-8] INFO  com.hms.security.jwt.JwtAuthenticationFilter - User recep authenticated successfully via JWT with authorities: [ROLE_RECEPTIONIST]
 2026-03-20 16:55:22.876 [http-nio-8082-exec-10] DEBUG com.hms.security.jwt.JwtAuthenticationFilter - User authorities: [ROLE_RECEPTIONIST]
 2026-03-20 16:55:22.912 [http-nio-8082-exec-10] INFO  com.hms.security.jwt.JwtAuthenticationFilter - User recep authenticated successfully via JWT with authorities: [ROLE_RECEPTIONIST]
+2026-03-20 16:56:50.048 [http-nio-8082-exec-2] DEBUG com.hms.security.jwt.JwtAuthenticationFilter - Authenticating user: recep
+2026-03-20 16:56:50.071 [http-nio-8082-exec-2] DEBUG com.hms.security.jwt.JwtAuthenticationFilter - User token version in DB: 12, in token: 12
+2026-03-20 16:56:50.081 [http-nio-8082-exec-2] DEBUG com.hms.security.jwt.JwtAuthenticationFilter - User authorities: [ROLE_RECEPTIONIST]
+2026-03-20 16:56:50.083 [http-nio-8082-exec-2] INFO  com.hms.security.jwt.JwtAuthenticationFilter - User recep authenticated successfully via JWT with authorities: [ROLE_RECEPTIONIST]
+2026-03-20 16:56:50.171 [http-nio-8082-exec-5] DEBUG com.hms.security.jwt.JwtAuthenticationFilter - Authenticating user: recep
+2026-03-20 16:56:50.175 [http-nio-8082-exec-5] DEBUG com.hms.security.jwt.JwtAuthenticationFilter - User token version in DB: 12, in token: 12
+2026-03-20 16:56:50.181 [http-nio-8082-exec-5] DEBUG com.hms.security.jwt.JwtAuthenticationFilter - User authorities: [ROLE_RECEPTIONIST]
+2026-03-20 16:56:50.183 [http-nio-8082-exec-5] INFO  com.hms.security.jwt.JwtAuthenticationFilter - User recep authenticated successfully via JWT with authorities: [ROLE_RECEPTIONIST]
+2026-03-20 16:56:52.833 [http-nio-8082-exec-6] DEBUG com.hms.security.jwt.JwtAuthenticationFilter - Authenticating user: recep
+2026-03-20 16:56:52.840 [http-nio-8082-exec-3] DEBUG com.hms.security.jwt.JwtAuthenticationFilter - Authenticating user: recep
+2026-03-20 16:56:52.840 [http-nio-8082-exec-6] DEBUG com.hms.security.jwt.JwtAuthenticationFilter - User token version in DB: 12, in token: 12
+2026-03-20 16:56:52.845 [http-nio-8082-exec-7] DEBUG com.hms.security.jwt.JwtAuthenticationFilter - Authenticating user: recep
+2026-03-20 16:56:52.846 [http-nio-8082-exec-3] DEBUG com.hms.security.jwt.JwtAuthenticationFilter - User token version in DB: 12, in token: 12
+2026-03-20 16:56:52.846 [http-nio-8082-exec-6] DEBUG com.hms.security.jwt.JwtAuthenticationFilter - User authorities: [ROLE_RECEPTIONIST]
+2026-03-20 16:56:52.846 [http-nio-8082-exec-6] INFO  com.hms.security.jwt.JwtAuthenticationFilter - User recep authenticated successfully via JWT with authorities: [ROLE_RECEPTIONIST]
+2026-03-20 16:56:52.846 [http-nio-8082-exec-3] DEBUG com.hms.security.jwt.JwtAuthenticationFilter - User authorities: [ROLE_RECEPTIONIST]
+2026-03-20 16:56:52.851 [http-nio-8082-exec-3] INFO  com.hms.security.jwt.JwtAuthenticationFilter - User recep authenticated successfully via JWT with authorities: [ROLE_RECEPTIONIST]
+2026-03-20 16:56:52.853 [http-nio-8082-exec-7] DEBUG com.hms.security.jwt.JwtAuthenticationFilter - User token version in DB: 12, in token: 12
+2026-03-20 16:56:52.859 [http-nio-8082-exec-7] DEBUG com.hms.security.jwt.JwtAuthenticationFilter - User authorities: [ROLE_RECEPTIONIST]
+2026-03-20 16:56:52.859 [http-nio-8082-exec-7] INFO  com.hms.security.jwt.JwtAuthenticationFilter - User recep authenticated successfully via JWT with authorities: [ROLE_RECEPTIONIST]
+2026-03-20 17:00:51.616 [http-nio-8082-exec-4] DEBUG com.hms.security.jwt.JwtAuthenticationFilter - Authenticating user: recep
+2026-03-20 17:00:51.628 [http-nio-8082-exec-4] DEBUG com.hms.security.jwt.JwtAuthenticationFilter - User token version in DB: 12, in token: 12
+2026-03-20 17:00:51.638 [http-nio-8082-exec-4] DEBUG com.hms.security.jwt.JwtAuthenticationFilter - User authorities: [ROLE_RECEPTIONIST]
+2026-03-20 17:00:51.639 [http-nio-8082-exec-4] INFO  com.hms.security.jwt.JwtAuthenticationFilter - User recep authenticated successfully via JWT with authorities: [ROLE_RECEPTIONIST]
+2026-03-20 17:00:53.288 [http-nio-8082-exec-9] DEBUG com.hms.security.jwt.JwtAuthenticationFilter - Authenticating user: recep
+2026-03-20 17:00:53.299 [http-nio-8082-exec-2] DEBUG com.hms.security.jwt.JwtAuthenticationFilter - Authenticating user: recep
+2026-03-20 17:00:53.312 [http-nio-8082-exec-9] DEBUG com.hms.security.jwt.JwtAuthenticationFilter - User token version in DB: 12, in token: 12
+2026-03-20 17:00:53.314 [http-nio-8082-exec-5] DEBUG com.hms.security.jwt.JwtAuthenticationFilter - Authenticating user: recep
+2026-03-20 17:00:53.316 [http-nio-8082-exec-2] DEBUG com.hms.security.jwt.JwtAuthenticationFilter - User token version in DB: 12, in token: 12
+2026-03-20 17:00:53.318 [http-nio-8082-exec-9] DEBUG com.hms.security.jwt.JwtAuthenticationFilter - User authorities: [ROLE_RECEPTIONIST]
+2026-03-20 17:00:53.320 [http-nio-8082-exec-9] INFO  com.hms.security.jwt.JwtAuthenticationFilter - User recep authenticated successfully via JWT with authorities: [ROLE_RECEPTIONIST]
+2026-03-20 17:00:53.327 [http-nio-8082-exec-5] DEBUG com.hms.security.jwt.JwtAuthenticationFilter - User token version in DB: 12, in token: 12
+2026-03-20 17:00:53.349 [http-nio-8082-exec-2] DEBUG com.hms.security.jwt.JwtAuthenticationFilter - User authorities: [ROLE_RECEPTIONIST]
+2026-03-20 17:00:53.349 [http-nio-8082-exec-2] INFO  com.hms.security.jwt.JwtAuthenticationFilter - User recep authenticated successfully via JWT with authorities: [ROLE_RECEPTIONIST]
+2026-03-20 17:00:53.356 [http-nio-8082-exec-5] DEBUG com.hms.security.jwt.JwtAuthenticationFilter - User authorities: [ROLE_RECEPTIONIST]
+2026-03-20 17:00:53.358 [http-nio-8082-exec-5] INFO  com.hms.security.jwt.JwtAuthenticationFilter - User recep authenticated successfully via JWT with authorities: [ROLE_RECEPTIONIST]
+2026-03-20 17:00:54.663 [http-nio-8082-exec-6] DEBUG com.hms.security.jwt.JwtAuthenticationFilter - Authenticating user: recep
+2026-03-20 17:00:54.672 [http-nio-8082-exec-6] DEBUG com.hms.security.jwt.JwtAuthenticationFilter - User token version in DB: 12, in token: 12
+2026-03-20 17:00:54.675 [http-nio-8082-exec-6] DEBUG com.hms.security.jwt.JwtAuthenticationFilter - User authorities: [ROLE_RECEPTIONIST]
+2026-03-20 17:00:54.677 [http-nio-8082-exec-6] INFO  com.hms.security.jwt.JwtAuthenticationFilter - User recep authenticated successfully via JWT with authorities: [ROLE_RECEPTIONIST]
+2026-03-20 17:00:56.775 [http-nio-8082-exec-3] DEBUG com.hms.security.jwt.JwtAuthenticationFilter - Authenticating user: recep
+2026-03-20 17:00:56.797 [http-nio-8082-exec-3] DEBUG com.hms.security.jwt.JwtAuthenticationFilter - User token version in DB: 12, in token: 12
+2026-03-20 17:00:56.803 [http-nio-8082-exec-3] DEBUG com.hms.security.jwt.JwtAuthenticationFilter - User authorities: [ROLE_RECEPTIONIST]
+2026-03-20 17:00:56.803 [http-nio-8082-exec-3] INFO  com.hms.security.jwt.JwtAuthenticationFilter - User recep authenticated successfully via JWT with authorities: [ROLE_RECEPTIONIST]
+2026-03-20 17:01:02.124 [http-nio-8082-exec-8] DEBUG com.hms.security.jwt.JwtAuthenticationFilter - Authenticating user: recep
+2026-03-20 17:01:02.132 [http-nio-8082-exec-8] DEBUG com.hms.security.jwt.JwtAuthenticationFilter - User token version in DB: 12, in token: 12
+2026-03-20 17:01:02.137 [http-nio-8082-exec-8] DEBUG com.hms.security.jwt.JwtAuthenticationFilter - User authorities: [ROLE_RECEPTIONIST]
+2026-03-20 17:01:02.137 [http-nio-8082-exec-8] INFO  com.hms.security.jwt.JwtAuthenticationFilter - User recep authenticated successfully via JWT with authorities: [ROLE_RECEPTIONIST]
+2026-03-20 17:01:02.200 [http-nio-8082-exec-8] DEBUG com.hms.security.jwt.JwtAuthenticationFilter - Authenticating user: recep
+2026-03-20 17:01:02.205 [http-nio-8082-exec-8] DEBUG com.hms.security.jwt.JwtAuthenticationFilter - User token version in DB: 12, in token: 12
+2026-03-20 17:01:02.207 [http-nio-8082-exec-8] DEBUG com.hms.security.jwt.JwtAuthenticationFilter - User authorities: [ROLE_RECEPTIONIST]
+2026-03-20 17:01:02.208 [http-nio-8082-exec-8] INFO  com.hms.security.jwt.JwtAuthenticationFilter - User recep authenticated successfully via JWT with authorities: [ROLE_RECEPTIONIST]
+2026-03-20 17:01:04.996 [http-nio-8082-exec-1] DEBUG com.hms.security.jwt.JwtAuthenticationFilter - Authenticating user: recep
+2026-03-20 17:01:05.005 [http-nio-8082-exec-1] DEBUG com.hms.security.jwt.JwtAuthenticationFilter - User token version in DB: 12, in token: 12
+2026-03-20 17:01:05.008 [http-nio-8082-exec-1] DEBUG com.hms.security.jwt.JwtAuthenticationFilter - User authorities: [ROLE_RECEPTIONIST]
+2026-03-20 17:01:05.008 [http-nio-8082-exec-1] INFO  com.hms.security.jwt.JwtAuthenticationFilter - User recep authenticated successfully via JWT with authorities: [ROLE_RECEPTIONIST]
+2026-03-20 17:01:18.702 [http-nio-8082-exec-9] DEBUG com.hms.security.jwt.JwtAuthenticationFilter - Authenticating user: recep
+2026-03-20 17:01:18.713 [http-nio-8082-exec-9] DEBUG com.hms.security.jwt.JwtAuthenticationFilter - User token version in DB: 12, in token: 12
+2026-03-20 17:01:18.724 [http-nio-8082-exec-9] DEBUG com.hms.security.jwt.JwtAuthenticationFilter - User authorities: [ROLE_RECEPTIONIST]
+2026-03-20 17:01:18.725 [http-nio-8082-exec-9] INFO  com.hms.security.jwt.JwtAuthenticationFilter - User recep authenticated successfully via JWT with authorities: [ROLE_RECEPTIONIST]
+2026-03-20 17:01:18.797 [http-nio-8082-exec-2] DEBUG com.hms.security.jwt.JwtAuthenticationFilter - Authenticating user: recep
+2026-03-20 17:01:18.805 [http-nio-8082-exec-2] DEBUG com.hms.security.jwt.JwtAuthenticationFilter - User token version in DB: 12, in token: 12
+2026-03-20 17:01:18.808 [http-nio-8082-exec-2] DEBUG com.hms.security.jwt.JwtAuthenticationFilter - User authorities: [ROLE_RECEPTIONIST]
+2026-03-20 17:01:18.808 [http-nio-8082-exec-2] INFO  com.hms.security.jwt.JwtAuthenticationFilter - User recep authenticated successfully via JWT with authorities: [ROLE_RECEPTIONIST]
+2026-03-20 17:01:21.171 [http-nio-8082-exec-5] DEBUG com.hms.security.jwt.JwtAuthenticationFilter - Authenticating user: recep
+2026-03-20 17:01:21.196 [http-nio-8082-exec-5] DEBUG com.hms.security.jwt.JwtAuthenticationFilter - User token version in DB: 12, in token: 12
+2026-03-20 17:01:21.203 [http-nio-8082-exec-5] DEBUG com.hms.security.jwt.JwtAuthenticationFilter - User authorities: [ROLE_RECEPTIONIST]
+2026-03-20 17:01:21.203 [http-nio-8082-exec-5] INFO  com.hms.security.jwt.JwtAuthenticationFilter - User recep authenticated successfully via JWT with authorities: [ROLE_RECEPTIONIST]
+2026-03-20 17:01:25.777 [http-nio-8082-exec-6] DEBUG com.hms.security.jwt.JwtAuthenticationFilter - Authenticating user: recep
+2026-03-20 17:01:25.785 [http-nio-8082-exec-6] DEBUG com.hms.security.jwt.JwtAuthenticationFilter - User token version in DB: 12, in token: 12
+2026-03-20 17:01:25.793 [http-nio-8082-exec-6] DEBUG com.hms.security.jwt.JwtAuthenticationFilter - User authorities: [ROLE_RECEPTIONIST]
+2026-03-20 17:01:25.793 [http-nio-8082-exec-6] INFO  com.hms.security.jwt.JwtAuthenticationFilter - User recep authenticated successfully via JWT with authorities: [ROLE_RECEPTIONIST]
+2026-03-20 17:01:42.408 [http-nio-8082-exec-7] DEBUG com.hms.security.jwt.JwtAuthenticationFilter - Authenticating user: recep
+2026-03-20 17:01:42.408 [http-nio-8082-exec-10] DEBUG com.hms.security.jwt.JwtAuthenticationFilter - Authenticating user: recep
+2026-03-20 17:01:42.417 [http-nio-8082-exec-7] DEBUG com.hms.security.jwt.JwtAuthenticationFilter - User token version in DB: 12, in token: 12
+2026-03-20 17:01:42.421 [http-nio-8082-exec-10] DEBUG com.hms.security.jwt.JwtAuthenticationFilter - User token version in DB: 12, in token: 12
+2026-03-20 17:01:42.423 [http-nio-8082-exec-7] DEBUG com.hms.security.jwt.JwtAuthenticationFilter - User authorities: [ROLE_RECEPTIONIST]
+2026-03-20 17:01:42.424 [http-nio-8082-exec-7] INFO  com.hms.security.jwt.JwtAuthenticationFilter - User recep authenticated successfully via JWT with authorities: [ROLE_RECEPTIONIST]
+2026-03-20 17:01:42.425 [http-nio-8082-exec-10] DEBUG com.hms.security.jwt.JwtAuthenticationFilter - User authorities: [ROLE_RECEPTIONIST]
+2026-03-20 17:01:42.425 [http-nio-8082-exec-10] INFO  com.hms.security.jwt.JwtAuthenticationFilter - User recep authenticated successfully via JWT with authorities: [ROLE_RECEPTIONIST]
